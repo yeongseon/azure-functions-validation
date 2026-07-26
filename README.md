@@ -37,6 +37,7 @@ Azure Functions Python v2 handlers often drift into the same repeated problems:
 - **Automatic error responses** — invalid requests get consistent `400`/`422` JSON error bodies
 - **Response model enforcement** — mismatches raise `ResponseValidationError` (HTTP 500)
 - **Decorator-first API** — `@validate_http` wraps your handler, no boilerplate needed
+- **Custom error formatting** — per-handler error shaping via `ErrorFormatter`
 
 ## How it works
 
@@ -202,13 +203,6 @@ This package does **not** target the legacy `function.json`-based v1 programming
 ## What this package does not do
 
 API documentation ([`azure-functions-openapi`](https://github.com/yeongseon/azure-functions-openapi-python)), runtime/graph deployment ([`azure-functions-langgraph`](https://github.com/yeongseon/azure-functions-langgraph-python)), and project scaffolding ([`azure-functions-scaffold`](https://github.com/yeongseon/azure-functions-scaffold-python)) are handled by sibling packages.
-
-## Features
-
-- Typed body, query, path, and header validation via `@validate_http`
-- Automatic 400 / 422 responses with `{"detail": [...]}` envelope
-- Response model validation — mismatches raise `ResponseValidationError` (HTTP 500)
-- Custom per-handler error formatting via `ErrorFormatter`
 
 ## Package names
 
