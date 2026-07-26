@@ -56,7 +56,8 @@ flowchart LR
 
 ## Before / After
 
-**Without** this package — manual parsing, manual errors, no contracts:
+<details>
+<summary><strong>Without</strong> this package — manual parsing, manual errors, no contracts</summary>
 
 ```python
 import json
@@ -96,6 +97,8 @@ def create_user(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
     )
 ```
+
+</details>
 
 **With** `@validate_http` — typed, consistent, contract-enforced:
 
@@ -198,10 +201,7 @@ This package does **not** target the legacy `function.json`-based v1 programming
 
 ## What this package does not do
 
-This package does not own:
-- API documentation and spec generation — use [`azure-functions-openapi`](https://github.com/yeongseon/azure-functions-openapi-python)
-- Runtime exposure or graph deployment — use [`azure-functions-langgraph`](https://github.com/yeongseon/azure-functions-langgraph-python)
-- Project scaffolding — use [`azure-functions-scaffold`](https://github.com/yeongseon/azure-functions-scaffold-python)
+API documentation ([`azure-functions-openapi`](https://github.com/yeongseon/azure-functions-openapi-python)), runtime/graph deployment ([`azure-functions-langgraph`](https://github.com/yeongseon/azure-functions-langgraph-python)), and project scaffolding ([`azure-functions-scaffold`](https://github.com/yeongseon/azure-functions-scaffold-python)) are handled by sibling packages.
 
 ## Features
 
@@ -265,7 +265,6 @@ class CreateUserResponse(BaseModel):
 app = func.FunctionApp()
 
 
-@app.function_name(name="create_user")
 @app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 @validate_http(body=CreateUserRequest, response_model=CreateUserResponse)
 def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserResponse:
