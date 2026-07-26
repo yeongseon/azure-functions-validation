@@ -304,6 +304,7 @@ curl -s "https://<your-app>.azurewebsites.net/api/users" \
 ```json
 {"message": "Hello Alice", "status": "success"}
 ```
+
 Invalid requests return the same `400` error in both environments:
 
 #### Local
