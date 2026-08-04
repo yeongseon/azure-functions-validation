@@ -1,6 +1,57 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.8.0] - 2026-08-04
+
+### Deprecate
+
+- *(api)* Warn on request_model in favor of body (#228) 
+
+### ⚙️ Miscellaneous Tasks
+
+- Normalize imports and formatting after PR integration 
+- *(deps)* Bump actions/stale from 10.4.0 to 11.0.0 
+- *(deps)* Bump github/codeql-action/init from 4.37.1 to 4.37.3 (#248) 
+- *(deps)* Bump actions/setup-node from 6.4.0 to 7.0.0 (#247) 
+- *(deps)* Bump actions/checkout from 7.0.0 to 7.0.1 (#245) 
+- *(deps)* Bump ruff from 0.15.22 to 0.16.0 (#244) 
+- *(deps)* Bump actions/setup-python from 6.3.0 to 7.0.0 (#243) 
+- *(worker)* Add nightly WorkerCompat matrix against azure-functions pre-release (#230) 
+
+### 🐛 Bug Fixes
+
+- *(errors)* Source-prefix error loc and correct PRD v2 syntax 
+- *(decorator)* Warn instead of silently disabling on wrong order 
+- *(pipeline)* Log response-validation 500s with exc_info 
+- *(ci)* Replace fragile Core Tools apt install with pinned npm (#227) 
+
+### 💼 Other
+
+- Bump version to 0.8.0 
+- Pin azure-functions>=1.17 and drop optional-import rule 
+
+### 📚 Documentation
+
+- *(agents)* Consolidate AGENT.md into AGENTS.md 
+- Sync translated Quick Start with English README 
+- Require translation sync in the same PR as English changes (Closes #241) (#242) 
+- Merge redundant Features list into What it does (#240) 
+- Add blank line after JSON block in Quick Start (#238) 
+- Correct azure-functions-db description in ecosystem table (#236) 
+- Trim Quick Start boilerplate and fold Before section (#233) (#234) 
+
+### 🚀 Features
+
+- *(testing)* Ship MockHttpRequest test helper 
+- *(errors)* Add error_format_version stability field to error envelope 
+- *(decorator)* Support status_code and public HttpError 
+- *(api)* Export ValidationAdapter and PydanticAdapter 
+
+### 🚜 Refactor
+
+- *(adapter)* Hoist missing-body model to module constant 
+- *(decorator)* Adopt canonical copy_identity_attrs helper (#231) (#232) 
+- *(metadata)* Type the validation cross-package metadata contract (#229) 
 ## [0.7.7] - 2026-07-18
 
 ### ⚙️ Miscellaneous Tasks
@@ -30,6 +81,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Update changelog 
 - Add e2e_app README, verify links, and substantiate Azure claim (#220) 
 - Correct pipeline sequence diagram and add README flow diagram (#221) 
 - Add discoverability metadata (pepy badge + llms.txt) (#226) 
