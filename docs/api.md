@@ -205,6 +205,28 @@ def custom_error(req: func.HttpRequest, body: InputModel) -> dict[str, int]:
 !!! tip "Formatter signature"
     Keep the formatter signature exactly `(exc: Exception, status_code: int) -> dict[str, Any]`.
 
+
+## `azure_functions_validation.testing.MockHttpRequest`
+
+A public test helper for unit-testing validated handlers. It subclasses the real
+`azure.functions.HttpRequest`, so it drives the genuine `@validate_http` pipeline
+end-to-end without a running Functions host.
+
+```python
+from azure_functions_validation.testing import MockHttpRequest
+
+request = MockHttpRequest(
+    method="POST",
+    json={"name": "Alice", "email": "alice@example.com"},
+    params={"debug": "true"},
+)
+response = create_user(request)
+assert response.status_code == 200
+```
+
+See [Testing](testing.md#testing-your-handlers-with-mockhttprequest) for the full
+list of constructor options.
+
 ## Error response shape reference
 
 Default validation and parsing errors use this envelope:

@@ -2,6 +2,64 @@
 
 This guide describes the test suite for `azure-functions-validation`, including how to run tests, the structure of the test suite, and guidelines for contributing new tests.
 
+## Testing your handlers with `MockHttpRequest`
+
+The package ships a public test helper, `MockHttpRequest`, so you can unit-test
+validated handlers without deploying or running the Functions host. It is a real
+`azure.functions.HttpRequest` subclass, so it drives the genuine `@validate_http`
+pipeline end-to-end.
+
+```python
+from azure_functions_validation import validate_http
+from azure_functions_validation.testing import MockHttpRequest
+from pydantic import BaseModel
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+
+
+class CreateUserResponse(BaseModel):
+    message: str
+
+
+@validate_http(body=CreateUserRequest, response_model=CreateUserResponse)
+def create_user(req, body: CreateUserRequest) -> CreateUserResponse:
+    return CreateUserResponse(message=f"Hello {body.name}")
+
+
+def test_create_user_ok():
+    request = MockHttpRequest(
+        method="POST",
+        json={"name": "Alice", "email": "alice@example.com"},
+    )
+    response = create_user(request)
+    assert response.status_code == 200
+    assert b"Hello Alice" in response.get_body()
+
+
+def test_create_user_missing_field_returns_422():
+    request = MockHttpRequest(method="POST", json={"name": "Alice"})
+    response = create_user(request)
+    assert response.status_code == 422
+```
+
+### Constructor options
+
+| Argument | Purpose |
+| :--- | :--- |
+| `method` | HTTP method (default `"GET"`). |
+| `url` | Request URL (default a local test URL). |
+| `json` | JSON-serializable value encoded as the body; sets `Content-Type: application/json` unless already provided. Mutually exclusive with `body`. |
+| `body` | Raw `bytes` or `str` body (a `str` is UTF-8 encoded). Mutually exclusive with `json`. |
+| `params` | Query-string parameters. |
+| `route_params` | Route (path) parameters. |
+| `headers` | Request headers. |
+
+Passing both `body` and `json` raises `ValueError`.
+
+
 ## Overview
 
 The `azure-functions-validation` project maintains a high standard of quality through a comprehensive test suite. The suite ensures that request validation, response serialization, and decorator behavior work correctly across different Python versions and Azure Functions scenarios.
