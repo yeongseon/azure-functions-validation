@@ -29,6 +29,8 @@ class TestAPISurface:
             "ResponseValidationError",
             "SerializationError",
             "ErrorFormatter",
+            "ValidationAdapter",
+            "PydanticAdapter",
         }
 
     def test_version_matches_distribution_metadata(self) -> None:
