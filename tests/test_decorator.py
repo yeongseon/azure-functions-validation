@@ -194,3 +194,47 @@ class TestCopyIdentityAttrs:
         # __dict__ must not be aliased: mutating wrapper must not touch func.
         wrapper.__dict__["_marker"] = 1
         assert "_marker" not in func.__dict__
+
+
+# ---------------------------------------------------------------------------
+# Wrong decorator order detection (issue #251)
+# ---------------------------------------------------------------------------
+
+
+class TestWrongDecoratorOrder:
+    """@validate_http applied above @app.route must warn, not silently no-op."""
+
+    def test_function_builder_by_method_signal_warns_and_returns_unwrapped(self) -> None:
+        """An object exposing ``configure_function_builder`` is treated as a builder."""
+
+        class FakeBuilder:
+            def configure_function_builder(self) -> None:  # pragma: no cover - marker only
+                ...
+
+        builder = FakeBuilder()
+        with pytest.warns(RuntimeWarning, match=r"@app\.route"):
+            result = validate_http(body=UserModel)(builder)
+        assert result is builder
+
+    def test_function_builder_by_type_name_fallback_warns(self) -> None:
+        """SDK builds without the method are still caught by the type-name fallback."""
+
+        class FunctionBuilder:  # name is the fallback signal
+            pass
+
+        builder = FunctionBuilder()
+        with pytest.warns(RuntimeWarning, match="FunctionBuilder"):
+            result = validate_http(body=UserModel)(builder)
+        assert result is builder
+
+    def test_normal_handler_is_not_flagged(self, recwarn: pytest.WarningsRecorder) -> None:
+        """A normal handler must wrap without emitting the wrong-order warning."""
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        wrapped = validate_http(body=UserModel)(handler)
+        assert wrapped is not handler
+        assert not any(
+            issubclass(w.category, RuntimeWarning) for w in recwarn.list
+        )

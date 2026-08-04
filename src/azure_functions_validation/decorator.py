@@ -60,7 +60,15 @@ def validate_http(
         adapter = PydanticAdapter()
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        if type(func).__name__ == "FunctionBuilder":
+        if _is_function_builder(func):
+            warnings.warn(
+                "@validate_http received an Azure Functions FunctionBuilder instead of "
+                "your handler, which means it was applied ABOVE @app.route. Validation "
+                "is NOT active for this function. Place @validate_http BELOW @app.route "
+                "so it wraps the handler directly.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
             return func
 
         is_async = inspect.iscoroutinefunction(func)
@@ -97,6 +105,19 @@ def validate_http(
 # ---------------------------------------------------------------------------
 # Decorator-time helpers (configuration validation, not request processing)
 # ---------------------------------------------------------------------------
+
+def _is_function_builder(func: Any) -> bool:
+    """Return ``True`` if *func* is an Azure Functions ``FunctionBuilder``.
+
+    A ``FunctionBuilder`` reaches this decorator only when ``@validate_http`` was
+    applied *above* ``@app.route`` (wrong order), in which case the real handler
+    is never wrapped and validation is silently disabled.  We detect it via the
+    ``configure_function_builder`` method that the ``@app.route`` machinery adds
+    to the builder, falling back to a type-name match for SDK builds that lack it.
+    """
+    if hasattr(func, "configure_function_builder"):
+        return True
+    return type(func).__name__ == "FunctionBuilder"
 
 
 def _find_request_param(
