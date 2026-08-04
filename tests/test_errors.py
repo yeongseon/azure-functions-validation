@@ -7,6 +7,7 @@ from azure.functions import HttpResponse
 import pytest
 
 from azure_functions_validation.errors import (
+    ERROR_FORMAT_VERSION,
     ErrorFormatter,
     ResponseValidationError,
     SerializationError,
@@ -78,7 +79,7 @@ class TestFormatErrorResponse:
         assert isinstance(resp, HttpResponse)
         assert resp.status_code == 422
         data = json.loads(resp.get_body().decode())
-        assert data == {"detail": [{"msg": "oops"}]}
+        assert data == {"detail": [{"msg": "oops"}], "error_format_version": 1}
         adapter.format_error.assert_called_once_with(exc)
 
     def test_uses_custom_formatter(self) -> None:
@@ -113,7 +114,8 @@ class TestFormatErrorResponse:
         assert resp.status_code == 500
         data = json.loads(resp.get_body().decode())
         assert data == {
-            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}]
+            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}],
+            "error_format_version": 1,
         }
         adapter.format_error.assert_not_called()
 
@@ -146,12 +148,45 @@ class TestFormatErrorResponse:
         assert resp.status_code == 500
         data = json.loads(resp.get_body().decode())
         assert data == {
-            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}]
+            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}],
+            "error_format_version": 1,
         }
         adapter.format_error.assert_not_called()
         # Verify that the exception was logged
         assert "error_formatter raised an unexpected exception" in caplog.text
         assert caplog.records[0].levelname == "ERROR"
+
+    def test_default_envelope_carries_format_version(self) -> None:
+        """Every default envelope is stamped with the stability marker."""
+        adapter = Mock()
+        adapter.format_error.return_value = {"detail": [{"msg": "oops"}]}
+
+        resp = format_error_response(ValueError("oops"), 422, adapter)
+
+        data = json.loads(resp.get_body().decode())
+        assert data["error_format_version"] == ERROR_FORMAT_VERSION
+
+    def test_adapter_supplied_version_is_not_overwritten(self) -> None:
+        """An adapter that already sets the marker keeps its own value."""
+        adapter = Mock()
+        adapter.format_error.return_value = {"detail": [], "error_format_version": 99}
+
+        resp = format_error_response(ValueError("x"), 422, adapter)
+
+        data = json.loads(resp.get_body().decode())
+        assert data["error_format_version"] == 99
+
+    def test_custom_formatter_output_is_not_stamped(self) -> None:
+        """A successful custom formatter owns its shape — no marker injected."""
+        adapter = Mock()
+
+        def fmt(exc: Exception, status: int) -> dict[str, object]:
+            return {"custom": True}
+
+        resp = format_error_response(ValueError("x"), 400, adapter, error_formatter=fmt)
+
+        data = json.loads(resp.get_body().decode())
+        assert "error_format_version" not in data
 
     def test_non_serializable_error_response_returns_sanitized_500(
         self,

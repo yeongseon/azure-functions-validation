@@ -273,6 +273,33 @@ Default validation and parsing errors use this envelope:
       "msg": "Field required",
       "type": "missing"
     }
+  ],
+  "error_format_version": 1
+}
+```
+
+### Stability contract
+
+Every **default** error envelope carries a top-level `error_format_version`
+integer. It lets downstream consumers (frontends, API gateways) pin against a
+known schema and detect breaking changes explicitly instead of silently
+misparsing new fields.
+
+- The current version is `1`.
+- The integer is bumped **only** when the default envelope changes in a
+  backwards-incompatible way; additive, optional fields do not bump it.
+- The marker is present on all built-in envelopes — validation errors (`4xx`),
+  sanitized server errors (`5xx`), and the internal-failure fallback.
+- A **custom** `ErrorFormatter` owns its output shape entirely: the marker is
+  never injected into a successful custom formatter's response. Emit your own
+  version field there if you need one.
+{
+  "detail": [
+    {
+      "loc": ["body", "field_name"],
+      "msg": "Field required",
+      "type": "missing"
+    }
   ]
 }
 ```
