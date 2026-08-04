@@ -15,7 +15,7 @@
 - Any PR that drops coverage below 95% must include additional tests to compensate.
 - Runtime code must remain compatible with Python 3.10+.
 - Public APIs must be fully typed.
-- No runtime dependency on `azure-functions` beyond what is required for type hints — keep imports optional where possible.
+- `azure-functions` (>=1.17) is a required runtime dependency; import it directly. This library only runs inside an Azure Functions app, where the package is always present.
 - Keep documentation examples, decorator behaviour, and tests synchronized.
 - The version test in `tests/test_public_api.py` reads from `importlib.metadata` and needs no manual edits across releases.
 
