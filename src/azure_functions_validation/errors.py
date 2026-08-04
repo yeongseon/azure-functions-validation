@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 ErrorFormatter = Callable[[Exception, int], dict[str, Any]]
 
+#: Stability marker embedded in every default error envelope.  Downstream
+#: consumers can pin against this integer; it is bumped only when the default
+#: error-response schema changes in a backwards-incompatible way.
+ERROR_FORMAT_VERSION = 1
+
 _SANITIZED_500_BODY = json.dumps(
     {
         "detail": [
@@ -93,6 +98,7 @@ def format_error_response(
         An ``HttpResponse`` with a JSON error body.
     """
     response_status_code = status_code
+    used_custom_formatter = False
 
     if error_formatter is not None:
         try:
@@ -102,11 +108,18 @@ def format_error_response(
             response_status_code = 500
 
             error_response = json.loads(_SANITIZED_500_BODY)
+        else:
+            used_custom_formatter = True
     elif status_code >= 500:
         # Sanitize server errors — never leak internal details to the client
         error_response = json.loads(_SANITIZED_500_BODY)
     else:
         error_response = adapter.format_error(exception)
+
+    # Stamp the stability marker on every default envelope, but never mutate a
+    # successful custom formatter's output — callers own that shape entirely.
+    if not used_custom_formatter and isinstance(error_response, dict):
+        error_response.setdefault("error_format_version", ERROR_FORMAT_VERSION)
 
     try:
         body = json.dumps(error_response)
