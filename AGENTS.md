@@ -3,6 +3,13 @@
 ## Purpose
 `azure-functions-validation` provides request and response validation for Azure Functions Python v2 applications using Pydantic.
 
+## Repository Identity
+- Project: `azure-functions-validation`
+- Project type: Python library
+- Runtime scope: Azure Functions Python v2 programming model
+- Minimum supported Python: `3.10`
+- Packaging: `pyproject.toml` with Hatch
+
 ## Read First
 - `README.md`
 - `CONTRIBUTING.md`
@@ -87,3 +94,50 @@ When splitting a large piece of work into focused issues, keep the umbrella open
 2. This runs: `hatch version` → `git commit` → `make changelog` → `git commit` → `git tag` → `git push`
 3. Tag push triggers **Publish to PyPI** GitHub Actions workflow automatically.
 4. Update `docs/changelog.md` separately if needed (different format from `CHANGELOG.md`).
+
+## Golden Commands
+
+Use Makefile entry points only. Do not bypass the Makefile in CI or contributor guidance.
+
+| Purpose | Command |
+| --- | --- |
+| Environment setup | `make install` |
+| Format code | `make format` |
+| Lint | `make lint` |
+| Type check | `make typecheck` |
+| Tests | `make test` |
+| Coverage | `make cov` |
+| Full validation | `make check-all` |
+| Docs build | `make docs` |
+| Package build | `make build` |
+
+## Testing Rules
+
+- Public APIs require tests.
+- Bug fixes require regression tests.
+- Representative and complex examples must remain smoke-tested.
+- `make check-all` is the minimum merge gate.
+
+## Commit Rules
+
+Use Conventional Commits:
+
+```text
+<type>: <short imperative summary>
+```
+
+Allowed types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `ci`
+
+## Agent Rules
+
+When using AI-assisted development:
+
+- Prefer small, reviewable changes.
+- Do not guess about behavior that can be verified.
+- Keep repository structure aligned with sibling repositories.
+- Update docs, examples, and tests together when behavior changes.
+
+## Final Rule
+
+If it is not automated, it will drift.
+If it is not documented, it is not a stable rule.
