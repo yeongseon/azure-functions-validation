@@ -49,6 +49,52 @@ def create_invoice(req: func.HttpRequest, body: CreateInvoiceBody) -> CreateInvo
     return CreateInvoiceResponse(invoice_id="inv_1001", status="created")
 ```
 
+### Usage example: status codes and controlled errors
+
+Use `status_code=` to set the success status (e.g. `201` for creation), and
+raise `HttpError` to return a controlled error through the standard
+`{"detail": [...]}` envelope without bypassing validation.
+
+```python
+import azure.functions as func
+from pydantic import BaseModel
+
+from azure_functions_validation import HttpError, validate_http
+
+
+class CreateUserBody(BaseModel):
+    name: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+app = func.FunctionApp()
+
+_USERS: dict[int, UserResponse] = {}
+
+
+@app.function_name(name="create_user")
+@app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(body=CreateUserBody, response_model=UserResponse, status_code=201)
+def create_user(req: func.HttpRequest, body: CreateUserBody) -> UserResponse:
+    user = UserResponse(id=len(_USERS) + 1, name=body.name)
+    _USERS[user.id] = user
+    return user  # HTTP 201
+
+
+@app.function_name(name="get_user")
+@app.route(route="users/{user_id}", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(response_model=UserResponse)
+def get_user(req: func.HttpRequest) -> UserResponse:
+    user = _USERS.get(int(req.route_params["user_id"]))
+    if user is None:
+        raise HttpError(404, "User not found")
+    return user
+```
+
 ### Usage example: query + path + headers
 
 ```python
@@ -204,6 +250,16 @@ def custom_error(req: func.HttpRequest, body: InputModel) -> dict[str, int]:
 
 !!! tip "Formatter signature"
     Keep the formatter signature exactly `(exc: Exception, status_code: int) -> dict[str, Any]`.
+
+## `HttpError`
+
+::: azure_functions_validation.HttpError
+
+Raise `HttpError(status_code, detail)` from a handler to return a controlled
+HTTP error rendered through the standard `{"detail": [...]}` envelope. `detail`
+may be a plain message (wrapped into a single entry) or a pre-built list of
+`{"loc", "msg", "type"}` mappings. Errors with `status_code >= 500` are
+sanitized so internal details never leak to clients.
 
 ## Error response shape reference
 

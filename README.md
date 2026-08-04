@@ -331,6 +331,62 @@ curl -s "https://<your-app>.azurewebsites.net/api/users" \
 
 > Manually verified by maintainers against a temporary Azure Functions deployment (koreacentral, Python 3.12, Consumption plan); response captured and URL anonymized. See [docs/deployment.md](docs/deployment.md#verification-status) for the verification status and context.
 
+## Status codes and controlled errors
+
+Return `201` on creation and raise controlled HTTP errors (e.g. `404`) without
+bypassing validation. Set the success status with `status_code=` and raise
+`HttpError` to render an error through the standard `{"detail": [...]}` envelope:
+
+```python
+import azure.functions as func
+from pydantic import BaseModel
+
+from azure_functions_validation import HttpError, validate_http
+
+app = func.FunctionApp()
+
+_USERS: dict[int, "UserResponse"] = {}
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+@app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(body=CreateUserRequest, response_model=UserResponse, status_code=201)
+def create_user(req: func.HttpRequest, body: CreateUserRequest) -> UserResponse:
+    user = UserResponse(id=len(_USERS) + 1, name=body.name)
+    _USERS[user.id] = user
+    return user  # HTTP 201
+
+
+@app.route(route="users/{user_id}", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(response_model=UserResponse)
+def get_user(req: func.HttpRequest) -> UserResponse:
+    user = _USERS.get(int(req.route_params["user_id"]))
+    if user is None:
+        raise HttpError(404, "User not found")  # standardized error envelope
+    return user
+```
+
+A missing user returns a consistent error body:
+
+```json
+{"detail": [{"loc": [], "msg": "User not found", "type": "http_error"}]}
+```
+
+> HTTP 404
+
+`HttpError` also accepts a pre-built `detail` list for richer errors, and
+server-side (`>=500`) errors are always sanitized so internal details never
+leak to clients.
+
 ## When to use
 
 - You have HTTP-triggered Azure Functions that accept JSON request bodies

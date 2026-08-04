@@ -119,6 +119,62 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
     return CreateUserResponse(message=f"Hello {body.name}")
 ```
 
+## 状态码与受控错误
+
+无需绕过验证即可在创建时返回 `201`，或抛出受控的 HTTP 错误（例如 `404`）。
+使用 `status_code=` 设置成功状态码，并抛出 `HttpError` 以标准
+`{"detail": [...]}` 格式渲染错误：
+
+```python
+import azure.functions as func
+from pydantic import BaseModel
+
+from azure_functions_validation import HttpError, validate_http
+
+app = func.FunctionApp()
+
+_USERS: dict[int, "UserResponse"] = {}
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+@app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(body=CreateUserRequest, response_model=UserResponse, status_code=201)
+def create_user(req: func.HttpRequest, body: CreateUserRequest) -> UserResponse:
+    user = UserResponse(id=len(_USERS) + 1, name=body.name)
+    _USERS[user.id] = user
+    return user  # HTTP 201
+
+
+@app.route(route="users/{user_id}", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(response_model=UserResponse)
+def get_user(req: func.HttpRequest) -> UserResponse:
+    user = _USERS.get(int(req.route_params["user_id"]))
+    if user is None:
+        raise HttpError(404, "User not found")  # 标准错误格式
+    return user
+```
+
+不存在的用户会返回一致的错误体：
+
+```json
+{"detail": [{"loc": [], "msg": "User not found", "type": "http_error"}]}
+```
+
+> HTTP 404
+
+`HttpError` 还可接受预先构建的 `detail` 列表以表达更丰富的错误，而服务端
+（`>=500`）错误始终会被清理，因此内部细节绝不会泄露给客户端。
+
+
 ## Documentation
 
 - 项目文档位于 `docs/`

@@ -53,7 +53,41 @@ class SerializationError(TypeError):
         """
         super().__init__(f"Cannot serialize type {type_name}")
         self.type_name = type_name
+        self.type_name = type_name
 
+
+class HttpError(Exception):
+    """Raised by a handler to return a controlled HTTP error response.
+
+    Rendered through the standard error envelope (``{"detail": [...]}``) by the
+    validation pipeline, so controlled errors (e.g. 404, 409) share the same
+    shape as automatic validation errors.
+
+    Args:
+        status_code: HTTP status code for the response (e.g. ``404``).
+        detail: Either a human-readable message (wrapped into a single
+            ``{"loc": [], "msg": ..., "type": ...}`` entry) or a pre-built list
+            of detail mappings matching the error-envelope schema.
+        error_type: ``type`` value used when *detail* is a plain message.
+    """
+
+    def __init__(
+        self,
+        status_code: int,
+        detail: Any = "Error",
+        *,
+        error_type: str = "http_error",
+    ) -> None:
+        super().__init__(str(detail))
+        self.status_code = status_code
+        self.detail = detail
+        self.error_type = error_type
+
+    def to_detail(self) -> list[dict[str, Any]]:
+        """Return the error-envelope ``detail`` list for this error."""
+        if isinstance(self.detail, list):
+            return self.detail
+        return [{"loc": [], "msg": str(self.detail), "type": self.error_type}]
 
 class AdapterValidationError(Exception):
     """Raised by validation adapters when request/response validation fails.
@@ -102,6 +136,9 @@ def format_error_response(
             response_status_code = 500
 
             error_response = json.loads(_SANITIZED_500_BODY)
+    elif isinstance(exception, HttpError) and status_code < 500:
+        # Controlled handler error — render its detail through the envelope.
+        error_response = {"detail": exception.to_detail()}
     elif status_code >= 500:
         # Sanitize server errors — never leak internal details to the client
         error_response = json.loads(_SANITIZED_500_BODY)

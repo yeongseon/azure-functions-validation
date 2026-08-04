@@ -119,6 +119,63 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
     return CreateUserResponse(message=f"Hello {body.name}")
 ```
 
+## 상태 코드와 제어된 오류
+
+검증을 우회하지 않고도 생성 시 `201`을 반환하거나 제어된 HTTP 오류(예: `404`)를
+발생시킬 수 있습니다. `status_code=`로 성공 상태 코드를 지정하고, `HttpError`를
+발생시키면 표준 `{"detail": [...]}` 형식으로 오류가 렌더링됩니다:
+
+```python
+import azure.functions as func
+from pydantic import BaseModel
+
+from azure_functions_validation import HttpError, validate_http
+
+app = func.FunctionApp()
+
+_USERS: dict[int, "UserResponse"] = {}
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+@app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(body=CreateUserRequest, response_model=UserResponse, status_code=201)
+def create_user(req: func.HttpRequest, body: CreateUserRequest) -> UserResponse:
+    user = UserResponse(id=len(_USERS) + 1, name=body.name)
+    _USERS[user.id] = user
+    return user  # HTTP 201
+
+
+@app.route(route="users/{user_id}", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(response_model=UserResponse)
+def get_user(req: func.HttpRequest) -> UserResponse:
+    user = _USERS.get(int(req.route_params["user_id"]))
+    if user is None:
+        raise HttpError(404, "User not found")  # 표준 오류 형식
+    return user
+```
+
+존재하지 않는 사용자는 일관된 오류 본문을 반환합니다:
+
+```json
+{"detail": [{"loc": [], "msg": "User not found", "type": "http_error"}]}
+```
+
+> HTTP 404
+
+`HttpError`는 더 풍부한 오류를 위해 미리 구성된 `detail` 리스트도 받을 수 있으며,
+서버 측(`>=500`) 오류는 항상 정제되어 내부 세부 정보가 클라이언트로 노출되지
+않습니다.
+
+
 ## Documentation
 
 - 프로젝트 문서: `docs/`

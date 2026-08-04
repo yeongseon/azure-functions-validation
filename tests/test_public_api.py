@@ -10,6 +10,7 @@ import pytest
 import azure_functions_validation
 from azure_functions_validation import (
     ErrorFormatter,
+    HttpError,
     ResponseValidationError,
     validate_http,
 )
@@ -29,6 +30,7 @@ class TestAPISurface:
             "ResponseValidationError",
             "SerializationError",
             "ErrorFormatter",
+            "HttpError",
         }
 
     def test_version_matches_distribution_metadata(self) -> None:
@@ -350,3 +352,11 @@ class TestTypeExports:
     def test_response_validation_error_str(self) -> None:
         err = ResponseValidationError("test message")
         assert str(err) == "test message"
+
+    def test_http_error_carries_status_and_detail(self) -> None:
+        err = HttpError(404, "missing")
+        assert isinstance(err, Exception)
+        assert err.status_code == 404
+        assert err.to_detail() == [
+            {"loc": [], "msg": "missing", "type": "http_error"}
+        ]

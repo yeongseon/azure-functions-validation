@@ -957,3 +957,114 @@ class TestErrorPathNormalization:
         assert response.status_code == 500
         data = json.loads(response.get_body().decode())
         assert "detail" in data
+
+
+
+# ---------------------------------------------------------------------------
+# Success status_code + public HttpError (Issue #254)
+# ---------------------------------------------------------------------------
+
+
+class TestSuccessStatusCode:
+    """``status_code=`` overrides the default 200 on the success path."""
+
+    def test_status_code_applies_with_response_model(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        @validate_http(body=UserModel, response_model=ResponseModel, status_code=201)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            return ResponseModel(message=f"created {body.name}")
+
+        response = handler(mock_request_factory(body=b'{"name": "Alice", "age": 30}'))
+        assert response.status_code == 201
+        data = json.loads(response.get_body().decode())
+        assert data["message"] == "created Alice"
+
+    def test_status_code_applies_without_response_model(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        @validate_http(body=UserModel, status_code=202)
+        def handler(req: HttpRequest, body: UserModel) -> dict[str, str]:
+            return {"name": body.name}
+
+        response = handler(mock_request_factory(body=b'{"name": "Bob", "age": 40}'))
+        assert response.status_code == 202
+
+    def test_default_status_code_is_200(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        @validate_http(body=UserModel, response_model=ResponseModel)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            return ResponseModel(message="ok")
+
+        response = handler(mock_request_factory(body=b'{"name": "Cara", "age": 22}'))
+        assert response.status_code == 200
+
+
+class TestHttpError:
+    """Public ``HttpError`` renders through the standard error envelope."""
+
+    def test_http_error_returns_status_and_envelope(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        from azure_functions_validation import HttpError
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            raise HttpError(404, "User not found")
+
+        response = handler(mock_request_factory(body=b'{"name": "Dan", "age": 33}'))
+        assert response.status_code == 404
+        data = json.loads(response.get_body().decode())
+        assert data["detail"] == [
+            {"loc": [], "msg": "User not found", "type": "http_error"}
+        ]
+
+    def test_http_error_accepts_structured_detail(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        from azure_functions_validation import HttpError
+
+        detail = [{"loc": ["body", "name"], "msg": "taken", "type": "conflict"}]
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            raise HttpError(409, detail)
+
+        response = handler(mock_request_factory(body=b'{"name": "Eve", "age": 27}'))
+        assert response.status_code == 409
+        data = json.loads(response.get_body().decode())
+        assert data["detail"] == detail
+
+    def test_http_error_5xx_is_sanitized(
+        self, mock_request_factory: RequestFactory,
+    ) -> None:
+        from azure_functions_validation import HttpError
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            raise HttpError(503, "database down: secret-host:5432")
+
+        response = handler(mock_request_factory(body=b'{"name": "Fay", "age": 44}'))
+        assert response.status_code == 503
+        data = json.loads(response.get_body().decode())
+        # Internal detail must not leak on server errors.
+        assert data["detail"][0]["msg"] == "Internal Server Error"
+        assert "secret-host" not in json.dumps(data)
+
+    @pytest.mark.anyio
+    async def test_async_http_error(
+        self, mock_request_factory: RequestFactory
+    ) -> None:
+        from azure_functions_validation import HttpError
+
+        @validate_http(body=UserModel)
+        async def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            raise HttpError(404, "missing")
+
+        response = await handler(
+            mock_request_factory(body=b'{"name": "Gus", "age": 51}')
+        )
+        assert response.status_code == 404
+        data = json.loads(response.get_body().decode())
+        assert data["detail"][0]["msg"] == "missing"
