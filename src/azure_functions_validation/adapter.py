@@ -172,15 +172,11 @@ class PydanticAdapter:
 
     @staticmethod
     def _missing_body_validation_error() -> AdapterValidationError:
-        class _MissingBodyPayload(BaseModel):
-            body: Any
-
-        try:
-            _MissingBodyPayload.model_validate({})
-        except PydanticValidationError as exc:
-            return PydanticAdapter._to_adapter_error(exc)
-
-        raise RuntimeError("Unreachable: expected missing body validation error")
+        # The underlying Pydantic model and its validation error are built once
+        # at import time (see ``_MISSING_BODY_ERROR`` below).  A fresh exception
+        # is returned per call so callers never share mutable error state.
+        message, detail = _MISSING_BODY_ERROR
+        return AdapterValidationError(message, [dict(entry) for entry in detail])
 
     def parse_body(self, req: HttpRequest, model: type[BaseModel]) -> Any:
         """Parse and validate request body from JSON.
@@ -380,3 +376,29 @@ class PydanticAdapter:
                     }
                 ]
             }
+
+
+
+def _compute_missing_body_error() -> tuple[str, list[dict[str, Any]]]:
+    """Build the missing-body validation error once, at import time.
+
+    Creating a Pydantic model class is relatively expensive; hoisting it out of
+    the per-request hot path avoids re-creating it on every empty-body request.
+    The resulting ``(message, detail)`` pair is reused to construct fresh
+    :class:`AdapterValidationError` instances with identical ``loc``/``msg``/
+    ``type`` output.
+    """
+
+    class _MissingBodyPayload(BaseModel):
+        body: Any
+
+    try:
+        _MissingBodyPayload.model_validate({})
+    except PydanticValidationError as exc:
+        adapter_error = PydanticAdapter._to_adapter_error(exc)
+        return str(exc), adapter_error.errors
+
+    raise RuntimeError("Unreachable: expected missing body validation error")
+
+
+_MISSING_BODY_ERROR: tuple[str, list[dict[str, Any]]] = _compute_missing_body_error()
