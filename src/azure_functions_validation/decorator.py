@@ -25,6 +25,7 @@ def validate_http(
     response_model: Any = None,
     adapter: ValidationAdapter | None = None,
     error_formatter: ErrorFormatter | None = None,
+    status_code: int = 200,
 ) -> Callable[..., Any]:
     """Decorator for validating HTTP request inputs and response outputs.
 
@@ -38,6 +39,8 @@ def validate_http(
         response_model: Pydantic model for response validation.
         adapter: Custom validation adapter (defaults to ``PydanticAdapter``).
         error_formatter: Per-handler custom error formatter.
+        status_code: HTTP status code for successful responses (default 200).
+            Use e.g. ``status_code=201`` for creation endpoints.
 
     Returns:
         A decorator that wraps the handler with validation logic.
@@ -94,6 +97,7 @@ def validate_http(
             func_params=func_params,
             request_param_name=request_param_name,
             response_type_adapter=response_type_adapter,
+            success_status_code=status_code,
         )
 
         wrapper = _make_wrapper(func, config, is_async=is_async)

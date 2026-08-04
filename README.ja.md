@@ -118,6 +118,63 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
     return CreateUserResponse(message=f"Hello {body.name}")
 ```
 
+## ステータスコードと制御されたエラー
+
+バリデーションをバイパスせずに、作成時に `201` を返したり、制御された HTTP エラー
+（例：`404`）を発生させたりできます。`status_code=` で成功時のステータスを指定し、
+`HttpError` を発生させると、標準の `{"detail": [...]}` 形式でエラーがレンダリングされます：
+
+```python
+import azure.functions as func
+from pydantic import BaseModel
+
+from azure_functions_validation import HttpError, validate_http
+
+app = func.FunctionApp()
+
+_USERS: dict[int, "UserResponse"] = {}
+
+
+class CreateUserRequest(BaseModel):
+    name: str
+    email: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+
+
+@app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(body=CreateUserRequest, response_model=UserResponse, status_code=201)
+def create_user(req: func.HttpRequest, body: CreateUserRequest) -> UserResponse:
+    user = UserResponse(id=len(_USERS) + 1, name=body.name)
+    _USERS[user.id] = user
+    return user  # HTTP 201
+
+
+@app.route(route="users/{user_id}", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@validate_http(response_model=UserResponse)
+def get_user(req: func.HttpRequest) -> UserResponse:
+    user = _USERS.get(int(req.route_params["user_id"]))
+    if user is None:
+        raise HttpError(404, "User not found")  # 標準エラー形式
+    return user
+```
+
+存在しないユーザーには一貫したエラーボディが返されます：
+
+```json
+{"detail": [{"loc": [], "msg": "User not found", "type": "http_error"}]}
+```
+
+> HTTP 404
+
+`HttpError` はより詳細なエラーのために事前に構築された `detail` リストも受け付けます。また、
+サーバーサイド（`>=500`）のエラーは常にサニタイズされ、内部の詳細がクライアントに
+漏れることはありません。
+
+
 ## Documentation
 
 - プロジェクトドキュメント: `docs/`

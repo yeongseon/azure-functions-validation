@@ -20,6 +20,7 @@ from .adapter import PydanticAdapter, ValidationAdapter
 from .errors import (
     AdapterValidationError,
     ErrorFormatter,
+    HttpError,
     ResponseValidationError,
     SerializationError,
     format_error_response,
@@ -47,6 +48,7 @@ class PipelineConfig:
     func_params: Mapping[str, Any] = field(default_factory=dict)
     request_param_name: str | None = None
     response_type_adapter: Any = None
+    success_status_code: int = 200
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +88,12 @@ def run_pipeline(
     early, merged = _prepare_invocation(args, kwargs, config)
     if early is not None:
         return early
-    result = func(*args, **merged) if args else func(**merged)
+    try:
+        result = func(*args, **merged) if args else func(**merged)
+    except HttpError as e:
+        return format_error_response(
+            e, e.status_code, config.adapter, config.error_formatter
+        )
     return _build_response(result, config)
 
 
@@ -100,7 +107,12 @@ async def run_pipeline_async(
     early, merged = _prepare_invocation(args, kwargs, config)
     if early is not None:
         return early
-    result = await (func(*args, **merged) if args else func(**merged))
+    try:
+        result = await (func(*args, **merged) if args else func(**merged))
+    except HttpError as e:
+        return format_error_response(
+            e, e.status_code, config.adapter, config.error_formatter
+        )
     return _build_response(result, config)
 
 
@@ -271,7 +283,9 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
             )
 
         return HttpResponse(
-            body=content, status_code=200, headers={"Content-Type": content_type}
+            body=content,
+            status_code=config.success_status_code,
+            headers={"Content-Type": content_type},
         )
 
     # No response model, serialize directly
@@ -285,6 +299,6 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
 
     return HttpResponse(
         body=content,
-        status_code=200,
+        status_code=config.success_status_code,
         headers={"Content-Type": content_type},
     )
