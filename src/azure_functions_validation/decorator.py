@@ -115,6 +115,7 @@ def validate_http(
 # Decorator-time helpers (configuration validation, not request processing)
 # ---------------------------------------------------------------------------
 
+
 def _is_function_builder(func: Any) -> bool:
     """Return ``True`` if *func* is an Azure Functions ``FunctionBuilder``.
 
@@ -213,9 +214,7 @@ class WorkerCompat:
         self._override_signature(wrapper)
         self._clear_annotations(wrapper)
 
-    def _copy_safe_metadata(
-        self, wrapper: Callable[..., Any], func: Callable[..., Any]
-    ) -> None:
+    def _copy_safe_metadata(self, wrapper: Callable[..., Any], func: Callable[..., Any]) -> None:
         """Copy safe identity attributes without setting ``__wrapped__``.
 
         Delegates to the canonical :func:`copy_identity_attrs` helper.

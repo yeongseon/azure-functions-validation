@@ -8,10 +8,8 @@ keeps ``decorator.py`` focused on configuration and wiring.
 
 from __future__ import annotations
 
-import logging
-
-
 from dataclasses import dataclass, field
+import logging
 from typing import Any, Callable, Mapping
 
 from azure.functions import HttpResponse
@@ -91,9 +89,7 @@ def run_pipeline(
     try:
         result = func(*args, **merged) if args else func(**merged)
     except HttpError as e:
-        return format_error_response(
-            e, e.status_code, config.adapter, config.error_formatter
-        )
+        return format_error_response(e, e.status_code, config.adapter, config.error_formatter)
     return _build_response(result, config)
 
 
@@ -110,9 +106,7 @@ async def run_pipeline_async(
     try:
         result = await (func(*args, **merged) if args else func(**merged))
     except HttpError as e:
-        return format_error_response(
-            e, e.status_code, config.adapter, config.error_formatter
-        )
+        return format_error_response(e, e.status_code, config.adapter, config.error_formatter)
     return _build_response(result, config)
 
 
@@ -262,7 +256,10 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
             )
             response_error = ResponseValidationError("Response validation failed")
             return format_error_response(
-                response_error, 500, config.adapter, config.error_formatter,
+                response_error,
+                500,
+                config.adapter,
+                config.error_formatter,
             )
         except Exception:
             logger.error(
@@ -271,7 +268,10 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
             )
             response_error = ResponseValidationError("Response validation failed")
             return format_error_response(
-                response_error, 500, config.adapter, config.error_formatter,
+                response_error,
+                500,
+                config.adapter,
+                config.error_formatter,
             )
 
         try:
@@ -279,7 +279,10 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
         except (SerializationError, TypeError) as e:
             logger.error("Failed to serialize validated response", exc_info=True)
             return format_error_response(
-                e, 500, config.adapter, config.error_formatter,
+                e,
+                500,
+                config.adapter,
+                config.error_formatter,
             )
 
         return HttpResponse(
@@ -294,7 +297,10 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
     except (SerializationError, TypeError) as e:
         logger.error("Failed to serialize response", exc_info=True)
         return format_error_response(
-            e, 500, config.adapter, config.error_formatter,
+            e,
+            500,
+            config.adapter,
+            config.error_formatter,
         )
 
     return HttpResponse(

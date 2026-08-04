@@ -94,6 +94,7 @@ class HttpError(Exception):
             return self.detail
         return [{"loc": [], "msg": str(self.detail), "type": self.error_type}]
 
+
 class AdapterValidationError(Exception):
     """Raised by validation adapters when request/response validation fails.
 
@@ -161,9 +162,7 @@ def format_error_response(
     try:
         body = json.dumps(error_response)
     except (TypeError, ValueError):
-        logger.exception(
-            "error_response could not be serialized to JSON"
-        )
+        logger.exception("error_response could not be serialized to JSON")
         body = _SANITIZED_500_BODY
         response_status_code = 500
 

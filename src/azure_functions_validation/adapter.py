@@ -39,9 +39,7 @@ def _is_dataclass_instance(obj: Any) -> bool:
 
 # Ordered serialization dispatch table: (type predicate, serializer).
 # The first matching predicate wins, mirroring the previous isinstance ladder.
-_SERIALIZERS: tuple[
-    tuple[Callable[[Any], bool], Callable[[Any], tuple[str | bytes, str]]], ...
-] = (
+_SERIALIZERS: tuple[tuple[Callable[[Any], bool], Callable[[Any], tuple[str | bytes, str]]], ...] = (
     (lambda o: isinstance(o, BaseModel), lambda o: (o.model_dump_json(), "application/json")),
     (
         lambda o: isinstance(o, (dict, list)),
@@ -52,6 +50,7 @@ _SERIALIZERS: tuple[
     (lambda o: isinstance(o, (int, float, bool)), lambda o: (json.dumps(o), "application/json")),
     (_is_dataclass_instance, lambda o: (json.dumps(dataclasses.asdict(o)), "application/json")),
 )
+
 
 class ValidationAdapter(Protocol):
     """Protocol defining the interface for validation adapters."""
@@ -118,8 +117,11 @@ class ValidationAdapter(Protocol):
         ...
 
     def validate_response(
-        self, obj: Any, model: Any,
-        *, type_adapter: TypeAdapter[Any] | None = None,
+        self,
+        obj: Any,
+        model: Any,
+        *,
+        type_adapter: TypeAdapter[Any] | None = None,
     ) -> Any:
         """Validate response object against model.
 
@@ -200,13 +202,9 @@ class PydanticAdapter:
         ]
         return AdapterValidationError(str(exc), detail)
 
-    def _source_error(
-        self, exc: PydanticValidationError, source: str
-    ) -> AdapterValidationError:
+    def _source_error(self, exc: PydanticValidationError, source: str) -> AdapterValidationError:
         """Convert *exc*, prefixing ``loc`` with *source* per ``legacy_loc``."""
-        return self._to_adapter_error(
-            exc, source=source, legacy_loc=self._legacy_loc
-        )
+        return self._to_adapter_error(exc, source=source, legacy_loc=self._legacy_loc)
 
     @staticmethod
     def _missing_body_validation_error() -> AdapterValidationError:
@@ -334,8 +332,11 @@ class PydanticAdapter:
             raise self._source_error(exc, "headers") from exc
 
     def validate_response(
-        self, obj: Any, model: Any,
-        *, type_adapter: TypeAdapter[Any] | None = None,
+        self,
+        obj: Any,
+        model: Any,
+        *,
+        type_adapter: TypeAdapter[Any] | None = None,
     ) -> Any:
         """Validate response object against model.
 
@@ -414,7 +415,6 @@ class PydanticAdapter:
                     }
                 ]
             }
-
 
 
 def _compute_missing_body_error() -> tuple[str, list[dict[str, Any]]]:

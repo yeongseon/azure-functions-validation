@@ -36,6 +36,7 @@ class PathModel(BaseModel):
 class HeaderModel(BaseModel):
     x_request_id: str
 
+
 def _make_request(body: bytes = b'{"name": "Alice", "age": 30}') -> Mock:
     mock_req = Mock(spec=HttpRequest)
     mock_req.method = "POST"
@@ -82,9 +83,7 @@ class TestToolkitMetadataConvention:
 
     def test_metadata_payload_contains_models(self) -> None:
         @validate_http(body=UserModel, query=QueryModel, response_model=UserModel)
-        def handler(
-            req: HttpRequest, body: UserModel, query: QueryModel
-        ) -> dict[str, object]:
+        def handler(req: HttpRequest, body: UserModel, query: QueryModel) -> dict[str, object]:
             return {"ok": True}
 
         meta = getattr(handler, _TOOLKIT_META_ATTR)

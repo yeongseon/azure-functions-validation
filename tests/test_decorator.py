@@ -132,7 +132,6 @@ class TestConfigurationErrors:
                 return HttpResponse("ok")
 
 
-
 # ---------------------------------------------------------------------------
 # Metadata isolation regression tests (issue #185)
 # ---------------------------------------------------------------------------
@@ -235,6 +234,4 @@ class TestWrongDecoratorOrder:
 
         wrapped = validate_http(body=UserModel)(handler)
         assert wrapped is not handler
-        assert not any(
-            issubclass(w.category, RuntimeWarning) for w in recwarn.list
-        )
+        assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)

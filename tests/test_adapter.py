@@ -99,9 +99,7 @@ class TestParseBody:
 
         # Identical normalized output across calls (hoisted, not regenerated).
         assert errors[0] == errors[1]
-        assert errors[0] == [
-            {"loc": ["body"], "msg": "Field required", "type": "missing"}
-        ]
+        assert errors[0] == [{"loc": ["body"], "msg": "Field required", "type": "missing"}]
         # Fresh list per call — mutating one must not affect the next.
         assert errors[0] is not errors[1]
         errors[0].append({"tampered": True})
@@ -292,9 +290,7 @@ class TestRequestParsing:
 class TestLocSourcePrefix:
     """Error ``loc`` values carry their input-source segment."""
 
-    def test_body_error_loc_is_prefixed(
-        self, adapter: PydanticAdapter, mock_request: type
-    ) -> None:
+    def test_body_error_loc_is_prefixed(self, adapter: PydanticAdapter, mock_request: type) -> None:
         req = mock_request(b'{"name": "Al", "age": 30}')
         with pytest.raises(AdapterValidationError) as exc_info:
             adapter.parse_body(req, UserModel)
@@ -503,7 +499,8 @@ class TestValidateResponseWithTypeAdapter:
         assert result.name == "Bob"
 
     def test_prebuilt_type_adapter_with_generic(
-        self, adapter: PydanticAdapter,
+        self,
+        adapter: PydanticAdapter,
     ) -> None:
         """Test pre-built TypeAdapter with generic type like list[UserModel]."""
         from pydantic import TypeAdapter
@@ -511,7 +508,9 @@ class TestValidateResponseWithTypeAdapter:
         ta = TypeAdapter(list[UserModel])
         data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
         result = adapter.validate_response(
-            data, list[UserModel], type_adapter=ta,
+            data,
+            list[UserModel],
+            type_adapter=ta,
         )
 
         assert len(result) == 2
@@ -547,10 +546,12 @@ class TestSerializeBroaderTypes:
         content, content_type = adapter.serialize(Point(x=1, y=2))
         assert content_type == "application/json"
         import json
+
         assert json.loads(content) == {"x": 1, "y": 2}
 
     def test_serialize_nested_dataclass_in_dict(
-        self, adapter: PydanticAdapter,
+        self,
+        adapter: PydanticAdapter,
     ) -> None:
         import dataclasses
 
@@ -562,10 +563,12 @@ class TestSerializeBroaderTypes:
         content, content_type = adapter.serialize({"point": Point(x=1, y=2)})
         assert content_type == "application/json"
         import json
+
         assert json.loads(content) == {"point": {"x": 1, "y": 2}}
 
     def test_serialize_unsupported_type_raises(
-        self, adapter: PydanticAdapter,
+        self,
+        adapter: PydanticAdapter,
     ) -> None:
         from azure_functions_validation.errors import SerializationError
 

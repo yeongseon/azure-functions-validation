@@ -10,7 +10,6 @@ async handlers, and response model validation — all of which now live in
 import asyncio
 import json
 import logging
-import json
 from typing import Callable, TypeAlias
 from unittest.mock import Mock
 
@@ -165,9 +164,7 @@ class TestSuccessfulValidation:
             def handler(req: HttpRequest, req_model: UserModel) -> ResponseModel:
                 return ResponseModel(message=f"Hello, {req_model.name}")
 
-    def test_body_param_does_not_warn(
-        self, mock_request_factory: RequestFactory
-    ) -> None:
+    def test_body_param_does_not_warn(self, mock_request_factory: RequestFactory) -> None:
         import warnings
 
         with warnings.catch_warnings():
@@ -497,9 +494,7 @@ class TestValidationErrors:
         data = json.loads(response.get_body().decode())
         assert any("name" in str(error.get("loc", [])) for error in data["detail"])
 
-    def test_body_error_loc_is_source_prefixed(
-        self, mock_request_factory: RequestFactory
-    ) -> None:
+    def test_body_error_loc_is_source_prefixed(self, mock_request_factory: RequestFactory) -> None:
         """End-to-end: body validation errors carry the ``body`` source prefix."""
 
         @validate_http(body=UserModel)
@@ -514,9 +509,7 @@ class TestValidationErrors:
         assert data["detail"][0]["loc"][0] == "body"
         assert data["detail"][0]["loc"] == ["body", "name"]
 
-    def test_legacy_loc_opt_out_removes_prefix(
-        self, mock_request_factory: RequestFactory
-    ) -> None:
+    def test_legacy_loc_opt_out_removes_prefix(self, mock_request_factory: RequestFactory) -> None:
         """``legacy_loc=True`` restores the pre-prefix ``loc`` shape."""
 
         @validate_http(body=UserModel, legacy_loc=True)
@@ -859,7 +852,8 @@ class TestNoneReturn:
     """Tests for None return type producing 204 No Content."""
 
     def test_none_return_gives_204(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         """Test that returning None produces a 204 response."""
 
@@ -873,7 +867,8 @@ class TestNoneReturn:
         assert response.status_code == 204
 
     def test_none_return_with_response_model_gives_204(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         """Test that None return bypasses response model validation with 204."""
 
@@ -903,7 +898,8 @@ class TestScalarReturn:
         assert data == 42
 
     def test_float_return(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         @validate_http()
         def handler(req: HttpRequest) -> float:
@@ -917,7 +913,8 @@ class TestScalarReturn:
         assert data == 3.14
 
     def test_bool_return(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         @validate_http()
         def handler(req: HttpRequest) -> bool:
@@ -935,7 +932,8 @@ class TestDataclassReturn:
     """Tests for dataclass return type (Issue #98)."""
 
     def test_dataclass_return_serializes_to_json(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         import dataclasses
 
@@ -965,7 +963,8 @@ class TestErrorPathNormalization:
     """Tests for normalized error handling (Issue #99)."""
 
     def test_resolve_http_request_error_returns_400(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         """Test that _resolve_http_request ValueError produces 400."""
 
@@ -981,7 +980,8 @@ class TestErrorPathNormalization:
         assert "detail" in data
 
     def test_serialization_error_without_response_model_returns_500(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         """Test that unsupported return type without response_model returns 500."""
 
@@ -997,7 +997,8 @@ class TestErrorPathNormalization:
         assert "detail" in data
 
     def test_serialization_error_with_response_model_returns_500(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         """Test serialization failure after validation returns structured 500."""
         adapter = Mock()
@@ -1018,7 +1019,6 @@ class TestErrorPathNormalization:
         assert "detail" in data
 
 
-
 # ---------------------------------------------------------------------------
 # Success status_code + public HttpError (Issue #254)
 # ---------------------------------------------------------------------------
@@ -1028,7 +1028,8 @@ class TestSuccessStatusCode:
     """``status_code=`` overrides the default 200 on the success path."""
 
     def test_status_code_applies_with_response_model(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         @validate_http(body=UserModel, response_model=ResponseModel, status_code=201)
         def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
@@ -1040,7 +1041,8 @@ class TestSuccessStatusCode:
         assert data["message"] == "created Alice"
 
     def test_status_code_applies_without_response_model(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         @validate_http(body=UserModel, status_code=202)
         def handler(req: HttpRequest, body: UserModel) -> dict[str, str]:
@@ -1050,7 +1052,8 @@ class TestSuccessStatusCode:
         assert response.status_code == 202
 
     def test_default_status_code_is_200(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         @validate_http(body=UserModel, response_model=ResponseModel)
         def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
@@ -1064,7 +1067,8 @@ class TestHttpError:
     """Public ``HttpError`` renders through the standard error envelope."""
 
     def test_http_error_returns_status_and_envelope(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         from azure_functions_validation import HttpError
 
@@ -1075,12 +1079,11 @@ class TestHttpError:
         response = handler(mock_request_factory(body=b'{"name": "Dan", "age": 33}'))
         assert response.status_code == 404
         data = json.loads(response.get_body().decode())
-        assert data["detail"] == [
-            {"loc": [], "msg": "User not found", "type": "http_error"}
-        ]
+        assert data["detail"] == [{"loc": [], "msg": "User not found", "type": "http_error"}]
 
     def test_http_error_accepts_structured_detail(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         from azure_functions_validation import HttpError
 
@@ -1096,7 +1099,8 @@ class TestHttpError:
         assert data["detail"] == detail
 
     def test_http_error_5xx_is_sanitized(
-        self, mock_request_factory: RequestFactory,
+        self,
+        mock_request_factory: RequestFactory,
     ) -> None:
         from azure_functions_validation import HttpError
 
@@ -1112,18 +1116,14 @@ class TestHttpError:
         assert "secret-host" not in json.dumps(data)
 
     @pytest.mark.anyio
-    async def test_async_http_error(
-        self, mock_request_factory: RequestFactory
-    ) -> None:
+    async def test_async_http_error(self, mock_request_factory: RequestFactory) -> None:
         from azure_functions_validation import HttpError
 
         @validate_http(body=UserModel)
         async def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
             raise HttpError(404, "missing")
 
-        response = await handler(
-            mock_request_factory(body=b'{"name": "Gus", "age": 51}')
-        )
+        response = await handler(mock_request_factory(body=b'{"name": "Gus", "age": 51}'))
         assert response.status_code == 404
         data = json.loads(response.get_body().decode())
         assert data["detail"][0]["msg"] == "missing"

@@ -3,6 +3,7 @@
 Usage:
     E2E_BASE_URL=https://<app>.azurewebsites.net pytest tests/e2e -v
 """
+
 from __future__ import annotations
 
 import os
