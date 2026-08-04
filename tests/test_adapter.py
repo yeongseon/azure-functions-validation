@@ -87,6 +87,28 @@ class TestParseBody:
         assert errors[0]["type"] == "missing"
         assert errors[0]["loc"] == ["body"]
 
+    def test_missing_body_error_is_stable_and_isolated(
+        self, adapter: PydanticAdapter, mock_request: type
+    ) -> None:
+        """Repeated empty-body parses yield identical but independent errors."""
+        errors = []
+        for _ in range(2):
+            with pytest.raises(AdapterValidationError) as exc_info:
+                adapter.parse_body(mock_request(b""), UserModel)
+            errors.append(exc_info.value.errors)
+
+        # Identical normalized output across calls (hoisted, not regenerated).
+        assert errors[0] == errors[1]
+        assert errors[0] == [
+            {"loc": ["body"], "msg": "Field required", "type": "missing"}
+        ]
+        # Fresh list per call — mutating one must not affect the next.
+        assert errors[0] is not errors[1]
+        errors[0].append({"tampered": True})
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_body(mock_request(b""), UserModel)
+        assert len(exc_info.value.errors) == 1
+
     def test_invalid_json(self, adapter: PydanticAdapter, mock_request: type) -> None:
         """Test parsing invalid JSON raises ValueError."""
         req = mock_request(b"{invalid json}")
