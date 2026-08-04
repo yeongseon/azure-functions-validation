@@ -112,7 +112,6 @@ class CreateUserResponse(BaseModel):
 app = func.FunctionApp()
 
 
-@app.function_name(name="create_user")
 @app.route(route="users", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 @validate_http(body=CreateUserRequest, response_model=CreateUserResponse)
 def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserResponse:
