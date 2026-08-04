@@ -495,6 +495,40 @@ class TestValidationErrors:
         data = json.loads(response.get_body().decode())
         assert any("name" in str(error.get("loc", [])) for error in data["detail"])
 
+    def test_body_error_loc_is_source_prefixed(
+        self, mock_request_factory: RequestFactory
+    ) -> None:
+        """End-to-end: body validation errors carry the ``body`` source prefix."""
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            return ResponseModel(message="ok")
+
+        request = mock_request_factory(body=b'{"age": 30}')
+        response = handler(request)
+
+        assert response.status_code == 422
+        data = json.loads(response.get_body().decode())
+        assert data["detail"][0]["loc"][0] == "body"
+        assert data["detail"][0]["loc"] == ["body", "name"]
+
+    def test_legacy_loc_opt_out_removes_prefix(
+        self, mock_request_factory: RequestFactory
+    ) -> None:
+        """``legacy_loc=True`` restores the pre-prefix ``loc`` shape."""
+
+        @validate_http(body=UserModel, legacy_loc=True)
+        def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
+            return ResponseModel(message="ok")
+
+        request = mock_request_factory(body=b'{"age": 30}')
+        response = handler(request)
+
+        assert response.status_code == 422
+        data = json.loads(response.get_body().decode())
+        assert data["detail"][0]["loc"] == ["name"]
+        assert any("name" in str(error.get("loc", [])) for error in data["detail"])
+
 
 # ---------------------------------------------------------------------------
 # Error hierarchy for non-body sources (query, path, headers)

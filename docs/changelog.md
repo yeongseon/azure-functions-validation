@@ -14,6 +14,29 @@ The changelog is generated from Conventional Commits using git-cliff. Breaking c
 
 ## Migration Guides
 
+### Error `loc` now carries an input-source prefix (upcoming minor)
+
+Validation error `loc` values are now prefixed with their input source, so a
+body field error reports `["body", "email"]` instead of `["email"]`. This
+disambiguates collisions across `body` / `query` / `path` / `headers` when the
+same field name appears in more than one source.
+
+- **Before:** `{"loc": ["email"], "msg": "Field required", "type": "missing"}`
+- **After:** `{"loc": ["body", "email"], "msg": "Field required", "type": "missing"}`
+
+If your clients parse `loc` positionally, update them to expect the leading
+source segment. For a one-release migration window, pass `legacy_loc=True` to
+`@validate_http` to restore the previous unprefixed shape:
+
+```python
+@validate_http(body=CreateUserRequest, legacy_loc=True)
+def create_user(req, body):
+    ...
+```
+
+`legacy_loc` is a temporary escape hatch and will be removed in a later release.
+
+
 ### Migrating from v0.3.0 to v0.5.0
 
 The v0.5.0 release significantly reduced the public API surface to focus on the core validation decorator.
