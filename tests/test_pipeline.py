@@ -9,6 +9,8 @@ async handlers, and response model validation — all of which now live in
 
 import asyncio
 import json
+import logging
+import json
 from typing import Callable, TypeAlias
 from unittest.mock import Mock
 
@@ -789,6 +791,29 @@ class TestCustomErrorFormatter:
         data = json.loads(response.get_body().decode())
         assert data["error_type"] == "CONTRACT_VIOLATION"
         assert data["http_status"] == 500
+
+    def test_response_validation_failure_is_logged_with_exc_info(
+        self, mock_request_factory: RequestFactory, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A response-validation 500 must leave a log record with exception info (#250)."""
+
+        class ResponseModel(BaseModel):
+            message: str
+
+        @validate_http(body=UserModel, response_model=ResponseModel)
+        def handler(req: HttpRequest, body: UserModel) -> dict[str, object]:
+            return {"invalid": "data"}
+
+        request = mock_request_factory(body=b'{"name": "Frank", "age": 40}')
+        with caplog.at_level(logging.ERROR, logger="azure_functions_validation.pipeline"):
+            response = handler(request)
+
+        assert response.status_code == 500
+        records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert records, "expected an ERROR log record for the response-validation failure"
+        assert any(r.exc_info is not None for r in records), (
+            "expected exc_info to be attached so the cause is visible in App Insights"
+        )
 
 
 # ---------------------------------------------------------------------------

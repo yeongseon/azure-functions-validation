@@ -8,6 +8,9 @@ keeps ``decorator.py`` focused on configuration and wiring.
 
 from __future__ import annotations
 
+import logging
+
+
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
@@ -21,6 +24,8 @@ from .errors import (
     SerializationError,
     format_error_response,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -238,11 +243,20 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
                 result, config.response_model, type_adapter=config.response_type_adapter
             )
         except AdapterValidationError:
+            logger.error(
+                "Response validation failed for handler %r",
+                getattr(config, "request_param_name", None),
+                exc_info=True,
+            )
             response_error = ResponseValidationError("Response validation failed")
             return format_error_response(
                 response_error, 500, config.adapter, config.error_formatter,
             )
         except Exception:
+            logger.error(
+                "Unexpected error during response validation",
+                exc_info=True,
+            )
             response_error = ResponseValidationError("Response validation failed")
             return format_error_response(
                 response_error, 500, config.adapter, config.error_formatter,
@@ -251,6 +265,7 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
         try:
             content, content_type = config.adapter.serialize(validated_result)
         except (SerializationError, TypeError) as e:
+            logger.error("Failed to serialize validated response", exc_info=True)
             return format_error_response(
                 e, 500, config.adapter, config.error_formatter,
             )
@@ -263,6 +278,7 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
     try:
         content, content_type = config.adapter.serialize(result)
     except (SerializationError, TypeError) as e:
+        logger.error("Failed to serialize response", exc_info=True)
         return format_error_response(
             e, 500, config.adapter, config.error_formatter,
         )
