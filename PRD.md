@@ -67,11 +67,16 @@ All validation errors use a **stable** `{"detail": [...]}` envelope:
     {
       "loc": ["body", "email"],
       "msg": "value is not a valid email address",
-      "type": "value_error.email"
+      "type": "value_error"
     }
   ]
 }
 ```
+
+Each `loc` is prefixed with its input source (`body`, `query`, `path`, or
+`headers`) so collisions across sources stay distinguishable. Pass
+`legacy_loc=True` to `validate_http` for one release to opt out of the source
+prefix during migration.
 
 | HTTP status | Trigger |
 |---|---|

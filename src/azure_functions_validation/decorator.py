@@ -26,6 +26,7 @@ def validate_http(
     adapter: ValidationAdapter | None = None,
     error_formatter: ErrorFormatter | None = None,
     status_code: int = 200,
+    legacy_loc: bool = False,
 ) -> Callable[..., Any]:
     """Decorator for validating HTTP request inputs and response outputs.
 
@@ -41,6 +42,10 @@ def validate_http(
         error_formatter: Per-handler custom error formatter.
         status_code: HTTP status code for successful responses (default 200).
             Use e.g. ``status_code=201`` for creation endpoints.
+        legacy_loc: When ``True``, error ``loc`` values omit the leading
+            input-source segment (``["email"]`` instead of ``["body", "email"]``).
+            A one-cycle migration escape hatch; ignored when a custom *adapter*
+            is supplied (configure that adapter directly).
 
     Returns:
         A decorator that wraps the handler with validation logic.
@@ -60,7 +65,7 @@ def validate_http(
 
     # Use default adapter if none provided
     if adapter is None:
-        adapter = PydanticAdapter()
+        adapter = PydanticAdapter(legacy_loc=legacy_loc)
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         if _is_function_builder(func):

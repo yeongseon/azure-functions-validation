@@ -288,6 +288,84 @@ class TestRequestParsing:
         assert result.user_id == 1
 
 
+# Test loc source-prefixing (#257)
+class TestLocSourcePrefix:
+    """Error ``loc`` values carry their input-source segment."""
+
+    def test_body_error_loc_is_prefixed(
+        self, adapter: PydanticAdapter, mock_request: type
+    ) -> None:
+        req = mock_request(b'{"name": "Al", "age": 30}')
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_body(req, UserModel)
+
+        loc = exc_info.value.errors[0]["loc"]
+        assert loc[0] == "body"
+        assert "name" in loc
+
+    def test_query_error_loc_is_prefixed(self, adapter: PydanticAdapter) -> None:
+        class QueryOnly(BaseModel):
+            count: int
+
+        class Request:
+            params = {"count": "not-an-int"}
+
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_query(cast(Any, Request()), QueryOnly)
+
+        assert exc_info.value.errors[0]["loc"][0] == "query"
+
+    def test_path_error_loc_is_prefixed(self, adapter: PydanticAdapter) -> None:
+        class PathModel(BaseModel):
+            user_id: int
+
+        request = func.HttpRequest(
+            method="GET",
+            url="/api/users/x",
+            body=b"",
+            params={},
+            headers={},
+            route_params={"user_id": "not-a-number"},
+        )
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_path(request, PathModel)
+
+        assert exc_info.value.errors[0]["loc"][0] == "path"
+
+    def test_headers_error_loc_is_prefixed(self, adapter: PydanticAdapter) -> None:
+        class HeaderOnly(BaseModel):
+            model_config = ConfigDict(populate_by_name=True)
+
+            request_id: str = Field(alias="X-Request-Id")
+
+        class Request:
+            headers: dict[str, str] = {}
+
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_headers(cast(Any, Request()), HeaderOnly)
+
+        assert exc_info.value.errors[0]["loc"][0] == "headers"
+
+    def test_missing_body_loc_is_not_double_prefixed(
+        self, adapter: PydanticAdapter, mock_request: type
+    ) -> None:
+        req = mock_request(b"")
+        with pytest.raises(AdapterValidationError) as exc_info:
+            adapter.parse_body(req, UserModel)
+
+        assert exc_info.value.errors[0]["loc"] == ["body"]
+
+    def test_legacy_loc_disables_prefixing(self, mock_request: type) -> None:
+        legacy = PydanticAdapter(legacy_loc=True)
+        req = mock_request(b'{"name": "Al", "age": 30}')
+        with pytest.raises(AdapterValidationError) as exc_info:
+            legacy.parse_body(req, UserModel)
+
+        loc = exc_info.value.errors[0]["loc"]
+        assert loc[0] != "body"
+        assert loc == ["name"]
+
+
 # Test serialize
 class TestSerialize:
     """Tests for serialize method."""

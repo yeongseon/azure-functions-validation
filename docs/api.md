@@ -317,6 +317,13 @@ Common status codes:
     - header errors: `loc` starts with `"headers"`
     - response errors: `loc` equals `["response"]`
 
+!!! tip "Opting out of the source prefix"
+    The leading source segment (`body` / `query` / `path` / `headers`) was
+    added to disambiguate same-named fields across inputs. To keep the previous
+    unprefixed `loc` for one migration cycle, pass `legacy_loc=True` to
+    `validate_http`. This escape hatch will be removed in a future release.
+    - response errors: `loc` equals `["response"]`
+
 ## Internal references
 
 These modules are useful for advanced extension work but are internal APIs:

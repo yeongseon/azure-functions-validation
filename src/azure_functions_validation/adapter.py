@@ -11,6 +11,19 @@ from pydantic import ValidationError as PydanticValidationError
 from .errors import AdapterValidationError, SerializationError
 
 
+def _prefix_loc(source: str | None, loc: list[Any], *, legacy_loc: bool) -> list[Any]:
+    """Prepend the input *source* segment to a Pydantic ``loc`` tuple.
+
+    Produces source-disambiguated locations such as ``["body", "email"]`` so
+    that body/query/path/header collisions are distinguishable.  When
+    *legacy_loc* is ``True`` (or *source* is ``None``) the raw ``loc`` is
+    returned unchanged for one-cycle backward compatibility.
+    """
+    if legacy_loc or source is None:
+        return loc
+    return [source, *loc]
+
+
 def _json_default(value: Any) -> Any:
     """Fallback JSON encoder for nested models/dataclasses inside dict/list."""
     if isinstance(value, BaseModel):
@@ -152,23 +165,48 @@ class ValidationAdapter(Protocol):
 class PydanticAdapter:
     """Concrete validation adapter implementation using Pydantic v2."""
 
+    def __init__(self, *, legacy_loc: bool = False) -> None:
+        """Initialize the adapter.
+
+        Args:
+            legacy_loc: When ``True``, error ``loc`` values are emitted without
+                the leading input-source segment (``["email"]`` instead of
+                ``["body", "email"]``).  This is a one-cycle migration escape
+                hatch and will be removed in a future release.
+        """
+        self._legacy_loc = legacy_loc
+
     @staticmethod
-    def _to_adapter_error(exc: PydanticValidationError) -> AdapterValidationError:
+    def _to_adapter_error(
+        exc: PydanticValidationError,
+        *,
+        source: str | None = None,
+        legacy_loc: bool = False,
+    ) -> AdapterValidationError:
         """Convert a Pydantic ``ValidationError`` into an ``AdapterValidationError``.
 
         The library-specific exception is preserved as ``__cause__`` while the
         normalized ``errors`` list keeps the pipeline and downstream callers
-        decoupled from Pydantic.
+        decoupled from Pydantic.  When *source* is provided, each ``loc`` is
+        prefixed with it (unless *legacy_loc* is set).
         """
         detail = [
             {
-                "loc": list(error["loc"]),
+                "loc": _prefix_loc(source, list(error["loc"]), legacy_loc=legacy_loc),
                 "msg": error["msg"],
                 "type": error["type"],
             }
             for error in exc.errors()
         ]
         return AdapterValidationError(str(exc), detail)
+
+    def _source_error(
+        self, exc: PydanticValidationError, source: str
+    ) -> AdapterValidationError:
+        """Convert *exc*, prefixing ``loc`` with *source* per ``legacy_loc``."""
+        return self._to_adapter_error(
+            exc, source=source, legacy_loc=self._legacy_loc
+        )
 
     @staticmethod
     def _missing_body_validation_error() -> AdapterValidationError:
@@ -217,7 +255,7 @@ class PydanticAdapter:
         try:
             return model.model_validate(data)
         except PydanticValidationError as exc:
-            raise self._to_adapter_error(exc) from exc
+            raise self._source_error(exc, "body") from exc
 
     def parse_query(self, req: HttpRequest, model: type[BaseModel]) -> Any:
         """Parse and validate query parameters.
@@ -244,7 +282,7 @@ class PydanticAdapter:
         try:
             return model.model_validate(query_data)
         except PydanticValidationError as exc:
-            raise self._to_adapter_error(exc) from exc
+            raise self._source_error(exc, "query") from exc
 
     def parse_path(self, req: HttpRequest, model: type[BaseModel]) -> Any:
         """Parse and validate path parameters.
@@ -266,7 +304,7 @@ class PydanticAdapter:
         try:
             return model.model_validate(route_params)
         except PydanticValidationError as exc:
-            raise self._to_adapter_error(exc) from exc
+            raise self._source_error(exc, "path") from exc
 
     def parse_headers(self, req: HttpRequest, model: type[BaseModel]) -> Any:
         """Parse and validate headers.
@@ -293,7 +331,7 @@ class PydanticAdapter:
         try:
             return model.model_validate(header_data)
         except PydanticValidationError as exc:
-            raise self._to_adapter_error(exc) from exc
+            raise self._source_error(exc, "headers") from exc
 
     def validate_response(
         self, obj: Any, model: Any,
@@ -322,7 +360,7 @@ class PydanticAdapter:
         try:
             return ta.validate_python(obj)
         except PydanticValidationError as exc:
-            raise self._to_adapter_error(exc) from exc
+            raise self._source_error(exc, "response") from exc
 
     def serialize(self, obj: Any) -> tuple[str | bytes, str]:
         """Serialize response object to content and content-type.

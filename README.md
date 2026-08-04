@@ -158,7 +158,7 @@ $ curl -s -X POST http://localhost:7071/api/users \
 {
   "detail": [
     {
-      "loc": ["email"],
+      "loc": ["body", "email"],
       "msg": "Field required",
       "type": "missing"
     }
