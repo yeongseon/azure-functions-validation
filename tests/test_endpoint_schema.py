@@ -165,7 +165,7 @@ class TestDefsIfRefRule:
             assert_defs_present_if_ref_used(schema)
 
     def test_non_dict_is_ignored(self) -> None:
-        assert_defs_present_if_ref_used("not a dict")  # type: ignore[arg-type]
+        assert_defs_present_if_ref_used("not a dict")
 
 
 class TestSchemaHashPin:

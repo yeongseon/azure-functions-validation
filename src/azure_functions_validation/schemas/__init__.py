@@ -74,7 +74,7 @@ def pinned_endpoint_schema_sha256() -> str:
     return text.strip().split()[0]
 
 
-def assert_defs_present_if_ref_used(schema: dict[str, Any]) -> None:
+def assert_defs_present_if_ref_used(schema: object) -> None:
     """Enforce the structural rule: any ``$ref`` requires a sibling ``$defs``.
 
     Producers MUST embed Pydantic schemas with ``$defs`` left unresolved so the
@@ -85,8 +85,10 @@ def assert_defs_present_if_ref_used(schema: dict[str, Any]) -> None:
     checked here.
 
     Raises:
-        ValueError: if a ``$ref`` occurs anywhere in ``schema`` without a
-            top-level ``$defs`` mapping.
+        ValueError: if ``schema`` is a mapping that contains a ``$ref``
+            anywhere without a top-level ``$defs`` mapping. Non-mapping
+            inputs are ignored (the rule only applies to schema objects).
+
     """
     if not isinstance(schema, dict):
         return
