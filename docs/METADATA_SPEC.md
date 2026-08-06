@@ -45,7 +45,7 @@ drift.
     { "name": "id", "in": "path", "required": true, "schema": { /* JSON Schema */ } }
   ],
   "responses": {                    // status-code (string) -> response object; or null
-    "200": { "description": "OK", "schema": { /* JSON Schema */ } }
+    "200": { "schema": { /* JSON Schema */ } }  // "description" optional; producer omits it in v1
   } | null,
   "summary": "…",                   // optional
   "description": "…",               // optional
