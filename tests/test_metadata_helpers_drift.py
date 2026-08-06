@@ -32,6 +32,9 @@ from azure_functions_validation import _metadata_helpers
 # assert this exact same hash so drift in EITHER repository fails.
 EXPECTED_SHA256 = "a3bde2d205f115faf225222dcbea503eb133f298ef8b8d2587d6030a72944287"
 
+# ``ModuleType.__file__`` is typed ``str | None``; for an imported source module
+# it is always set, but assert to keep mypy --strict happy.
+assert _metadata_helpers.__file__ is not None
 _HELPERS_PATH = Path(_metadata_helpers.__file__)
 
 
