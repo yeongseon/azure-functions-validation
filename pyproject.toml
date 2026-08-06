@@ -101,6 +101,20 @@ security = "python -m bandit -r src"
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# Honor `exclude` lists even when ruff is invoked with explicit file paths
+# (e.g. the pre-commit ruff-format hook, which passes staged filenames). This
+# keeps _metadata_helpers.py's format-exclude effective in every invocation.
+# Linting is unaffected: `[tool.ruff.lint]` has no exclude, so the file is
+# still linted; only formatting is skipped for it (see #273).
+force-exclude = true
+
+[tool.ruff.format]
+# _metadata_helpers.py is byte-identical across sibling packages (see #273).
+# Exclude it from formatting so `ruff format` can never silently break the
+# byte-identity invariant guarded by tests/test_metadata_helpers_drift.py.
+exclude = ["src/azure_functions_validation/_metadata_helpers.py"]
+
+
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]

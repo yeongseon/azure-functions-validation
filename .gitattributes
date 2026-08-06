@@ -1,0 +1,4 @@
+# Pin line endings to LF for the byte-identical worker-compat helper so its
+# sha256 stays stable across platforms and checkouts. Guarded by
+# tests/test_metadata_helpers_drift.py. See issue #273.
+src/azure_functions_validation/_metadata_helpers.py text eol=lf
