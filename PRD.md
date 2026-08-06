@@ -69,7 +69,8 @@ All validation errors use a **stable** `{"detail": [...]}` envelope:
       "msg": "value is not a valid email address",
       "type": "value_error"
     }
-  ]
+  ],
+  "error_format_version": 1
 }
 ```
 
@@ -85,6 +86,12 @@ prefix during migration.
 | 500 | Response model contract violation |
 
 This format follows FastAPI / Pydantic conventions for broad tooling compatibility.
+
+Every default envelope carries a top-level `error_format_version` integer (an
+additive, backwards-compatible field). Downstream consumers may pin against it;
+it is bumped only when the default error-response schema changes incompatibly.
+Consumers validating responses must allow unknown/additional properties. Custom
+`ErrorFormatter` output is never stamped — callers own that shape entirely.
 
 ## Compatibility
 

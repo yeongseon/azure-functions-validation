@@ -1101,6 +1101,7 @@ class TestHttpError:
     def test_http_error_5xx_is_sanitized(
         self,
         mock_request_factory: RequestFactory,
+        caplog: pytest.LogCaptureFixture,
     ) -> None:
         from azure_functions_validation import HttpError
 
@@ -1108,12 +1109,20 @@ class TestHttpError:
         def handler(req: HttpRequest, body: UserModel) -> ResponseModel:
             raise HttpError(503, "database down: secret-host:5432")
 
-        response = handler(mock_request_factory(body=b'{"name": "Fay", "age": 44}'))
+        with caplog.at_level(logging.ERROR, logger="azure_functions_validation.pipeline"):
+            response = handler(mock_request_factory(body=b'{"name": "Fay", "age": 44}'))
         assert response.status_code == 503
         data = json.loads(response.get_body().decode())
         # Internal detail must not leak on server errors.
         assert data["detail"][0]["msg"] == "Internal Server Error"
         assert "secret-host" not in json.dumps(data)
+        # N8 regression: a server-side (>=500) HttpError must be logged with exc_info
+        # so the cause is visible in App Insights (parity with the 500 log path).
+        records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert records, "expected an ERROR log record for the 5xx HttpError"
+        assert any(r.exc_info is not None for r in records), (
+            "expected exc_info attached for the server-side HttpError"
+        )
 
     @pytest.mark.anyio
     async def test_async_http_error(self, mock_request_factory: RequestFactory) -> None:
@@ -1127,3 +1136,34 @@ class TestHttpError:
         assert response.status_code == 404
         data = json.loads(response.get_body().decode())
         assert data["detail"][0]["msg"] == "missing"
+
+
+class TestHandlerNameInLogs:
+    """N1 regression: 500 logs must identify the failing handler, not 'req'."""
+
+    def test_response_validation_log_names_the_handler(
+        self,
+        mock_request_factory: RequestFactory,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """The log record must carry the handler qualname, not the request param."""
+
+        class ResponseModel(BaseModel):
+            message: str
+
+        @validate_http(body=UserModel, response_model=ResponseModel)
+        def uniquely_named_handler(req: HttpRequest, body: UserModel) -> dict[str, object]:
+            return {"invalid": "data"}
+
+        request = mock_request_factory(body=b'{"name": "Ivy", "age": 30}')
+        with caplog.at_level(logging.ERROR, logger="azure_functions_validation.pipeline"):
+            response = uniquely_named_handler(request)
+
+        assert response.status_code == 500
+        records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert records, "expected an ERROR log record"
+        # The formatted message must contain the handler's qualname, and must not
+        # be the useless request-parameter name ('req').
+        rendered = " ".join(r.getMessage() for r in records)
+        assert "uniquely_named_handler" in rendered
+        assert "'req'" not in rendered

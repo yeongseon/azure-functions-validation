@@ -25,7 +25,8 @@ _SANITIZED_500_BODY = json.dumps(
                 "msg": "Internal Server Error",
                 "type": "server_error",
             }
-        ]
+        ],
+        "error_format_version": ERROR_FORMAT_VERSION,
     }
 )
 
@@ -57,7 +58,6 @@ class SerializationError(TypeError):
             type_name: Name of the unsupported type.
         """
         super().__init__(f"Cannot serialize type {type_name}")
-        self.type_name = type_name
         self.type_name = type_name
 
 

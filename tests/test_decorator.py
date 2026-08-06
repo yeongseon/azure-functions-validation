@@ -203,14 +203,25 @@ class TestCopyIdentityAttrs:
 class TestWrongDecoratorOrder:
     """@validate_http applied above @app.route must warn, not silently no-op."""
 
-    def test_function_builder_by_method_signal_warns_and_returns_unwrapped(self) -> None:
-        """An object exposing ``configure_function_builder`` is treated as a builder."""
+    def test_real_sdk_function_builder_warns_and_returns_unwrapped(self) -> None:
+        """A genuine SDK ``FunctionBuilder`` (from ``@app.route``) must be detected.
 
-        class FakeBuilder:
-            def configure_function_builder(self) -> None:  # pragma: no cover - marker only
-                ...
+        Uses the real ``azure.functions`` SDK so this test fails automatically if a
+        future SDK release changes how ``FunctionBuilder`` is produced or named.
+        """
+        import azure.functions as azf
+        from azure.functions.decorators.function_app import FunctionBuilder
 
-        builder = FakeBuilder()
+        app = azf.FunctionApp()
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:  # pragma: no cover
+            return HttpResponse("ok")
+
+        # ``app.route(...)`` returns a FunctionBuilder; applying @validate_http on
+        # top of that reproduces the wrong-order mistake (decorator above @app.route).
+        builder = app.route(route="users", methods=["POST"])(handler)
+        assert isinstance(builder, FunctionBuilder)
+
         with pytest.warns(RuntimeWarning, match=r"@app\.route"):
             result = validate_http(body=UserModel)(builder)
         assert result is builder

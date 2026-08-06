@@ -208,8 +208,11 @@ class TestFormatErrorResponse:
         # Should return 500 with sanitized body
         assert resp.status_code == 500
         data = json.loads(resp.get_body().decode())
+        # N2 regression: the JSON-dump-failure fallback must also carry the
+        # stability marker so pinning consumers never hit an unversioned envelope.
         assert data == {
-            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}]
+            "detail": [{"loc": [], "msg": "Internal Server Error", "type": "server_error"}],
+            "error_format_version": 1,
         }
         adapter.format_error.assert_not_called()
         # Verify that the serialization error was logged

@@ -47,6 +47,7 @@ class PipelineConfig:
     request_param_name: str | None = None
     response_type_adapter: Any = None
     success_status_code: int = 200
+    handler_name: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -89,6 +90,13 @@ def run_pipeline(
     try:
         result = func(*args, **merged) if args else func(**merged)
     except HttpError as e:
+        if e.status_code >= 500:
+            logger.error(
+                "Handler %r raised a server-side HttpError (%d)",
+                config.handler_name,
+                e.status_code,
+                exc_info=True,
+            )
         return format_error_response(e, e.status_code, config.adapter, config.error_formatter)
     return _build_response(result, config)
 
@@ -106,6 +114,13 @@ async def run_pipeline_async(
     try:
         result = await (func(*args, **merged) if args else func(**merged))
     except HttpError as e:
+        if e.status_code >= 500:
+            logger.error(
+                "Handler %r raised a server-side HttpError (%d)",
+                config.handler_name,
+                e.status_code,
+                exc_info=True,
+            )
         return format_error_response(e, e.status_code, config.adapter, config.error_formatter)
     return _build_response(result, config)
 
@@ -251,7 +266,7 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
         except AdapterValidationError:
             logger.error(
                 "Response validation failed for handler %r",
-                getattr(config, "request_param_name", None),
+                config.handler_name,
                 exc_info=True,
             )
             response_error = ResponseValidationError("Response validation failed")
@@ -263,7 +278,8 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
             )
         except Exception:
             logger.error(
-                "Unexpected error during response validation",
+                "Unexpected error during response validation for handler %r",
+                config.handler_name,
                 exc_info=True,
             )
             response_error = ResponseValidationError("Response validation failed")
@@ -277,7 +293,11 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
         try:
             content, content_type = config.adapter.serialize(validated_result)
         except (SerializationError, TypeError) as e:
-            logger.error("Failed to serialize validated response", exc_info=True)
+            logger.error(
+                "Failed to serialize validated response for handler %r",
+                config.handler_name,
+                exc_info=True,
+            )
             return format_error_response(
                 e,
                 500,
@@ -295,7 +315,11 @@ def _build_response(result: Any, config: PipelineConfig) -> HttpResponse:
     try:
         content, content_type = config.adapter.serialize(result)
     except (SerializationError, TypeError) as e:
-        logger.error("Failed to serialize response", exc_info=True)
+        logger.error(
+            "Failed to serialize response for handler %r",
+            config.handler_name,
+            exc_info=True,
+        )
         return format_error_response(
             e,
             500,

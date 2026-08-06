@@ -14,6 +14,13 @@ from .adapter import PydanticAdapter, ValidationAdapter
 from .errors import ErrorFormatter
 from .pipeline import PipelineConfig, run_pipeline, run_pipeline_async
 
+try:  # pragma: no cover - exercised indirectly; import guard for SDK variance
+    from azure.functions.decorators.function_app import (
+        FunctionBuilder as _FunctionBuilder,
+    )
+except ImportError:  # pragma: no cover - defensive; azure-functions is required
+    _FunctionBuilder = None  # type: ignore[assignment,misc]
+
 
 def validate_http(
     *,
@@ -103,6 +110,7 @@ def validate_http(
             request_param_name=request_param_name,
             response_type_adapter=response_type_adapter,
             success_status_code=status_code,
+            handler_name=getattr(func, "__qualname__", None) or getattr(func, "__name__", None),
         )
 
         wrapper = _make_wrapper(func, config, is_async=is_async)
@@ -121,11 +129,11 @@ def _is_function_builder(func: Any) -> bool:
 
     A ``FunctionBuilder`` reaches this decorator only when ``@validate_http`` was
     applied *above* ``@app.route`` (wrong order), in which case the real handler
-    is never wrapped and validation is silently disabled.  We detect it via the
-    ``configure_function_builder`` method that the ``@app.route`` machinery adds
-    to the builder, falling back to a type-name match for SDK builds that lack it.
+    is never wrapped and validation is silently disabled.  We detect it via a
+    real ``isinstance`` check against the SDK type, falling back to a type-name
+    match only when the SDK class cannot be imported.
     """
-    if hasattr(func, "configure_function_builder"):
+    if _FunctionBuilder is not None and isinstance(func, _FunctionBuilder):
         return True
     return type(func).__name__ == "FunctionBuilder"
 
