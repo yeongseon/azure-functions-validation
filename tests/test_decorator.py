@@ -246,3 +246,82 @@ class TestWrongDecoratorOrder:
         wrapped = validate_http(body=UserModel)(handler)
         assert wrapped is not handler
         assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)
+
+
+class TestLoggingDecoratorOrder:
+    """@validate_http above @with_context must warn (validation errors lose context)."""
+
+    @staticmethod
+    def _with_logging_metadata(handler: object) -> object:
+        """Simulate ``@with_context`` having run first (inner) on *handler*."""
+        from azure_functions_validation._metadata import METADATA_ATTR
+
+        setattr(
+            handler,
+            METADATA_ATTR,
+            {"logging": {"version": 1, "context_param": "context"}},
+        )
+        return handler
+
+    def test_warns_when_logging_metadata_present(self) -> None:
+        """Wrong order: @with_context applied inner leaves a ``logging`` namespace."""
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        inner = self._with_logging_metadata(handler)
+        with pytest.warns(RuntimeWarning, match=r"@with_context"):
+            wrapped = validate_http(body=UserModel)(inner)
+        assert wrapped is not inner
+
+    def test_warns_for_async_handler(self) -> None:
+        """The guard fires before sync/async dispatch, so async handlers warn too."""
+
+        async def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        inner = self._with_logging_metadata(handler)
+        with pytest.warns(RuntimeWarning, match=r"@with_context"):
+            wrapped = validate_http(body=UserModel)(inner)
+        assert wrapped is not inner
+
+
+    def test_warns_preserves_logging_namespace(self) -> None:
+        """The wrapper keeps the pre-existing ``logging`` namespace (merge, no clobber)."""
+        from azure_functions_validation._metadata import METADATA_ATTR
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        inner = self._with_logging_metadata(handler)
+        with pytest.warns(RuntimeWarning, match=r"@with_context"):
+            wrapped = validate_http(body=UserModel)(inner)
+        meta = getattr(wrapped, METADATA_ATTR)
+        assert "logging" in meta
+        assert "validation" in meta
+
+    def test_no_warning_for_correct_order(
+        self, recwarn: pytest.WarningsRecorder
+    ) -> None:
+        """Correct order: @validate_http runs first, sees no ``logging`` namespace."""
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        wrapped = validate_http(body=UserModel)(handler)
+        assert wrapped is not handler
+        assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)
+
+    def test_no_warning_for_unrelated_namespace(
+        self, recwarn: pytest.WarningsRecorder
+    ) -> None:
+        """A non-logging namespace (e.g. another sibling) must not trigger the warning."""
+        from azure_functions_validation._metadata import METADATA_ATTR
+
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        setattr(handler, METADATA_ATTR, {"openapi": {"version": 1}})
+        wrapped = validate_http(body=UserModel)(handler)
+        assert wrapped is not handler
+        assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)

@@ -9,7 +9,7 @@ import warnings
 from pydantic import TypeAdapter
 
 from ._endpoint import build_endpoint_metadata, set_endpoint_metadata
-from ._metadata import ValidationMetadata, set_validation_metadata
+from ._metadata import METADATA_ATTR, ValidationMetadata, set_validation_metadata
 from ._metadata_helpers import SAFE_IDENTITY_ATTRS, copy_identity_attrs
 from .adapter import PydanticAdapter, ValidationAdapter
 from .errors import ErrorFormatter
@@ -87,6 +87,19 @@ def validate_http(
             )
             return func
 
+        # Cross-repo decorator-order guard (azure-functions-logging#310).
+        if _has_logging_metadata(func):
+            warnings.warn(
+                "@validate_http is applied ABOVE @with_context (from "
+                "azure-functions-logging). In this order, validation error "
+                "responses (e.g. 4xx) are produced before @with_context runs, so "
+                "they are logged WITHOUT correlation context. Place @with_context "
+                "ABOVE @validate_http (outermost, just under @app.route) so it "
+                "wraps the validated handler.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+
         is_async = inspect.iscoroutinefunction(func)
 
         func_sig = inspect.signature(func)
@@ -137,6 +150,25 @@ def _is_function_builder(func: Any) -> bool:
     if _FunctionBuilder is not None and isinstance(func, _FunctionBuilder):
         return True
     return type(func).__name__ == "FunctionBuilder"
+
+
+#: Namespace key written by ``azure-functions-logging``'s ``@with_context``.
+#: Matched as a literal string (no import of that package) per the shared
+#: ``_azure_functions_metadata`` contract. See azure-functions-logging#310.
+_LOGGING_NAMESPACE = "logging"
+
+
+def _has_logging_metadata(func: Any) -> bool:
+    """Return ``True`` if *func* already carries logging (``@with_context``) metadata.
+
+    This happens only when ``@with_context`` was applied *before* (inner to)
+    ``@validate_http`` — i.e. ``@validate_http`` is above ``@with_context``, the
+    wrong order. Detection reads the shared ``_azure_functions_metadata`` dict for
+    the ``"logging"`` namespace using the literal key, without importing the
+    logging package.
+    """
+    metadata = getattr(func, METADATA_ATTR, None)
+    return isinstance(metadata, dict) and _LOGGING_NAMESPACE in metadata
 
 
 def _find_request_param(
