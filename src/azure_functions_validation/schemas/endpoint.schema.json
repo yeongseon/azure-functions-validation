@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yeongseon.github.io/azure-functions-python-dx/endpoint.schema.json",
+  "title": "Azure Functions DX Toolkit — endpoint metadata namespace (v1)",
+  "description": "Shape of _azure_functions_metadata[\"endpoint\"]. Producer packages (e.g. azure-functions-validation, azure-functions-langgraph) write this payload; consumer packages (e.g. azure-functions-openapi) read it. This contract is replicated across toolkit packages, not shared via a runtime dependency. Keep byte-identical copies in sync via the pinned SHA-256 digest.",
+  "type": "object",
+  "required": ["version"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "description": "Schema version for the endpoint namespace payload. Consumers MUST warn (not fail) on an unknown version and fall back gracefully.",
+      "const": 1
+    },
+    "request_body": {
+      "description": "JSON Schema of the request body model, or null when the endpoint takes no body. Canonicalization: Pydantic model_json_schema(by_alias=True, mode='validation', ref_template='#/$defs/{model}'). $defs are left UNRESOLVED — the consumer (openapi) hoists them into components/schemas and remains the sole $ref-collision authority.",
+      "anyOf": [
+        { "$ref": "#/$defs/jsonSchema" },
+        { "type": "null" }
+      ]
+    },
+    "request_body_required": {
+      "description": "Whether the request body is required. Defaults to true unless every field of the body model has a default.",
+      "type": "boolean"
+    },
+    "parameters": {
+      "description": "OpenAPI-style parameter objects derived from query/path/header models. Refs, if present, MUST remain unresolved and be accompanied by $defs on the owning schema.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/parameter" }
+    },
+    "responses": {
+      "description": "Map of HTTP status code (as string) to a response object carrying the response model's JSON Schema. null when no response model is declared. Response schemas use mode='serialization'.",
+      "anyOf": [
+        {
+          "type": "object",
+          "propertyNames": { "pattern": "^[1-5][0-9]{2}$" },
+          "additionalProperties": { "$ref": "#/$defs/response" }
+        },
+        { "type": "null" }
+      ]
+    },
+    "summary": {
+      "description": "Short human-readable summary of the operation.",
+      "type": "string"
+    },
+    "description": {
+      "description": "Longer human-readable description of the operation.",
+      "type": "string"
+    },
+    "tags": {
+      "description": "OpenAPI operation tags.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "security": {
+      "description": "OpenAPI security requirement objects for the operation.",
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "$defs": {
+    "jsonSchema": {
+      "description": "An embedded JSON Schema document (Pydantic-generated). Kept permissive: producers embed schemas verbatim; the consumer validates structure.",
+      "type": "object"
+    },
+    "parameter": {
+      "description": "OpenAPI parameter object subset.",
+      "type": "object",
+      "required": ["name", "in"],
+      "properties": {
+        "name": { "type": "string" },
+        "in": {
+          "type": "string",
+          "enum": ["query", "path", "header", "cookie"]
+        },
+        "required": { "type": "boolean" },
+        "description": { "type": "string" },
+        "schema": { "$ref": "#/$defs/jsonSchema" }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "description": "OpenAPI-style response object carrying an embedded response schema.",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "schema": {
+          "anyOf": [
+            { "$ref": "#/$defs/jsonSchema" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
