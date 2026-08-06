@@ -5,11 +5,16 @@ Runtime pipeline behaviour (parsing, response building) is tested in
 that happens when ``@validate_http(...)`` is applied to a function.
 """
 
+from collections.abc import Callable
+from typing import TypeVar
+
 from azure.functions import HttpRequest, HttpResponse
 from pydantic import BaseModel, Field
 import pytest
 
 from azure_functions_validation import validate_http
+
+_HandlerT = TypeVar("_HandlerT", bound=Callable[..., object])
 
 # ---------------------------------------------------------------------------
 # Minimal models used by configuration tests
@@ -252,7 +257,7 @@ class TestLoggingDecoratorOrder:
     """@validate_http above @with_context must warn (validation errors lose context)."""
 
     @staticmethod
-    def _with_logging_metadata(handler: object) -> object:
+    def _with_logging_metadata(handler: _HandlerT) -> _HandlerT:
         """Simulate ``@with_context`` having run first (inner) on *handler*."""
         from azure_functions_validation._metadata import METADATA_ATTR
 
