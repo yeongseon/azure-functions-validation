@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.8.1] - 2026-08-06
+
+### ⚙️ Miscellaneous Tasks
+
+- Track issue priority via priority:* labels instead of body line (#269) 
+
+### 🐛 Bug Fixes
+
+- Correct wrong-order detection, 500 log attribution, and error-envelope stability 
+
+### 💼 Other
+
+- Bump version to 0.8.1 
 ## [0.8.0] - 2026-08-04
 
 ### Deprecate
@@ -32,6 +45,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Update changelog 
 - *(agents)* Consolidate AGENT.md into AGENTS.md 
 - Sync translated Quick Start with English README 
 - Require translation sync in the same PR as English changes (Closes #241) (#242) 
