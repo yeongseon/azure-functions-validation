@@ -8,6 +8,7 @@ import warnings
 
 from pydantic import TypeAdapter
 
+from ._endpoint import build_endpoint_metadata, set_endpoint_metadata
 from ._metadata import ValidationMetadata, set_validation_metadata
 from ._metadata_helpers import SAFE_IDENTITY_ATTRS, copy_identity_attrs
 from .adapter import PydanticAdapter, ValidationAdapter
@@ -313,5 +314,10 @@ def _make_wrapper(
         "response_model": config.response_model,
     }
     set_validation_metadata(wrapper, func, _payload)
+
+    # Also expose the shared, OpenAPI-ready "endpoint" namespace (self-contained
+    # JSON Schema) that openapi consumes without importing this package. Both
+    # namespaces are written this cycle for backward compatibility.
+    set_endpoint_metadata(wrapper, wrapper, build_endpoint_metadata(config))
 
     return wrapper

@@ -51,6 +51,20 @@ class ValidationMetadata(_BaseMetadata):
     response_model: Any
 
 
+def _merge_namespace(wrapper: Any, source: Any, namespace: str, payload: Any) -> None:
+    """Merge *payload* under *namespace* onto *wrapper* without clobbering others.
+
+    Seeds from any pre-existing convention attribute on *source* (set by other
+    decorators applied before this one, or by an earlier namespace write in the
+    same decorator), merges in *payload* under *namespace*, and writes the
+    result onto *wrapper*.
+    """
+    existing = getattr(source, METADATA_ATTR, None)
+    base: dict[str, Any] = dict(existing) if isinstance(existing, dict) else {}
+    base[namespace] = payload
+    setattr(wrapper, METADATA_ATTR, base)
+
+
 def set_validation_metadata(
     wrapper: Any,
     func: Any,
@@ -62,10 +76,7 @@ def set_validation_metadata(
     decorators applied before this one), merges in ``payload`` under the
     ``validation`` namespace, and writes the result onto ``wrapper``.
     """
-    existing = getattr(func, METADATA_ATTR, None)
-    base: dict[str, Any] = dict(existing) if isinstance(existing, dict) else {}
-    base[NAMESPACE] = payload
-    setattr(wrapper, METADATA_ATTR, base)
+    _merge_namespace(wrapper, func, NAMESPACE, payload)
 
 
 def read_validation_metadata(func: Any) -> ValidationMetadata | None:

@@ -2,6 +2,12 @@
 
 Status: **v1** · Owner namespace: `endpoint` · Issue: [#271](https://github.com/yeongseon/azure-functions-validation-python/issues/271) · Umbrella: [#270](https://github.com/yeongseon/azure-functions-validation-python/issues/270)
 
+> **Localization:** This specification is a canonical, English-only technical
+> document (the machine-readable source of truth is the JSON Schema it links to).
+> It is intentionally **not** part of the translated README set
+> (`README.ko.md`, `README.ja.md`, `README.zh-CN.md`) and requires no translation
+> updates when it changes.
+
 ## Purpose
 
 The Azure Functions Python DX Toolkit lets sibling packages cooperate without
@@ -45,7 +51,7 @@ drift.
     { "name": "id", "in": "path", "required": true, "schema": { /* JSON Schema */ } }
   ],
   "responses": {                    // status-code (string) -> response object; or null
-    "200": { "description": "OK", "schema": { /* JSON Schema */ } }
+    "200": { "schema": { /* JSON Schema */ } }  // "description" optional; producer omits it in v1
   } | null,
   "summary": "…",                   // optional
   "description": "…",               // optional
