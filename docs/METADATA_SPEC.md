@@ -51,7 +51,8 @@ drift.
     { "name": "id", "in": "path", "required": true, "schema": { /* JSON Schema */ } }
   ],
   "responses": {                    // status-code (string) -> response object; or null
-    "200": { "schema": { /* JSON Schema */ } }  // "description" optional; producer omits it in v1
+    "200": { "schema": { /* JSON Schema */ } },  // "description" optional; producer omits it in v1
+    "422": { "schema": { /* validation-error envelope */ } } // present when request validation applies
   } | null,
   "summary": "…",                   // optional
   "description": "…",               // optional
@@ -65,6 +66,43 @@ drift.
 The Azure Functions route binding (`@app.route(route=…, methods=…)`) is the
 single source of truth for path and HTTP methods. The consumer derives them at
 scan time from the binding, so producers must not duplicate them here.
+
+### The `422` validation-error response
+
+When the operation performs request validation — i.e. any of `body`, `query`,
+`path`, or `headers` is a Pydantic model — producers MUST add a `"422"` entry to
+`responses` describing the standardized validation-error body the runtime
+returns on invalid input:
+
+```jsonc
+{
+  "type": "object",
+  "required": ["detail"],
+  "properties": {
+    "detail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "properties": {
+          "loc": { "type": "array", "items": { "type": ["string", "integer"] } },
+          "msg": { "type": "string" },
+          "type": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+```
+
+The `422` schema is **self-contained** (no `$ref`, no `$defs`). It is emitted
+independently of `response_model`: an operation with a request model but no
+`response_model` still carries a `responses` map of just `{"422": …}`. When
+there is no request model, no `422` is emitted. This documents the default
+`{"detail": [...]}` envelope only; a custom `ErrorFormatter` may change the
+runtime body without changing this schema. Adding `422` is an additive change
+and does not bump the namespace version.
+
 
 ## Canonicalization rules (producers MUST follow)
 
