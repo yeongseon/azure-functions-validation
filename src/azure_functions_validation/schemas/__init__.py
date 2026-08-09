@@ -25,14 +25,9 @@ from importlib import resources
 import json
 from typing import Any
 
-__all__ = [
-    "ENDPOINT_METADATA_VERSION",
-    "ENDPOINT_SCHEMA_FILENAME",
-    "assert_defs_present_if_ref_used",
-    "endpoint_schema_sha256",
-    "load_endpoint_schema",
-    "pinned_endpoint_schema_sha256",
-]
+# NOTE: This subpackage is internal. It deliberately declares no ``__all__`` so
+# none of its names read as a supported public API; sibling packages MUST NOT
+# import from here (see the module docstring and docs/METADATA_SPEC.md).
 
 #: Current version of the ``endpoint`` namespace payload. Bump only on a
 #: breaking payload change; consumers warn (not fail) on unknown versions.
