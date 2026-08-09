@@ -142,6 +142,10 @@ requires plain JSON Schema with `$defs` left unresolved:
 | Generator class | Pydantic default `GenerateJsonSchema` (pin explicitly if customized; Pydantic minor bumps can change output) |
 | `request_body_required` | `True` unless every field of the body model has a default |
 
+The response-schema mode above applies to **Pydantic-derived response-model
+schemas**. The `422` validation-error response schema is produced directly
+(not from a Pydantic model) and is unaffected by these settings.
+
 ### Structural rule: `$defs` if `$ref`
 
 Any embedded schema that contains a `$ref` **anywhere** MUST carry a top-level

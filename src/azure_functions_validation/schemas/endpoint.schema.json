@@ -27,7 +27,7 @@
       "items": { "$ref": "#/$defs/parameter" }
     },
     "responses": {
-      "description": "Map of HTTP status code (as string) to a response object carrying the response's JSON Schema; null when the producer has no responses to describe. Response schemas use mode='serialization'.",
+      "description": "Map of HTTP status code (as string) to a response object carrying the response's JSON Schema; null when the producer has no responses to describe. Pydantic-derived response-model schemas use mode='serialization'; other entries (e.g. the 422 validation-error schema) are produced directly and are unaffected.",
       "anyOf": [
         {
           "type": "object",
