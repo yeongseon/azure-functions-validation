@@ -65,11 +65,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 sources = ["src"]
 
-[tool.hatch.build.targets.wheel]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/azure_functions_validation/schemas/endpoint.schema.json" = "azure_functions_validation/schemas/endpoint.schema.json"
-"src/azure_functions_validation/schemas/endpoint.schema.sha256" = "azure_functions_validation/schemas/endpoint.schema.sha256"
+# Schema data files under src/azure_functions_validation/schemas/ are included
+# automatically via sources=["src"]. Do NOT use force-include with a src/-prefixed
+# path: it breaks build-via-sdist (the sdist strips the src/ prefix), which is how
+# the PyPI publish workflow builds the wheel.
 
 [tool.hatch.version]
 path = "src/azure_functions_validation/__init__.py"
