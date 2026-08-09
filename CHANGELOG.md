@@ -1,6 +1,15 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.9.1] - 2026-08-09
+
+### 🐛 Bug Fixes
+
+- *(build)* Drop src/-prefixed force-include so wheel builds from sdist 
+
+### 💼 Other
+
+- Bump version to 0.9.1 
 ## [0.9.0] - 2026-08-09
 
 ### ⚙️ Miscellaneous Tasks
@@ -14,6 +23,10 @@ All notable changes to this project will be documented in this file.
 ### 💼 Other
 
 - Bump version to 0.9.0 
+
+### 📚 Documentation
+
+- Update changelog 
 
 ### 🚀 Features
 
