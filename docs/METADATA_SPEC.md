@@ -169,8 +169,9 @@ alone and is enforced by
 
 - `version` starts at `1`. Bump only on a **breaking** payload change.
 - Additive, optional fields do **not** bump the version.
-- On a bump, update the schema, its SHA-256 pin, this spec, and every sibling
-  producer/consumer in the same release train.
+- On a bump, update the schema, its SHA-256 pin, and this spec, and coordinate
+  producer/consumer support as needed before shipping the breaking version.
+  Packages release independently — there is no coordinated release train.
 
 ## Internal helpers (not a public API)
 
