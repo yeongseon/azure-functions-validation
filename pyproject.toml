@@ -23,7 +23,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "azure-functions>=1.17",
+    # Cap below 2.0.0: azure-functions v2 may change worker function-indexing
+    # behavior this package relies on. See knowledge#46 / dx#8.
+    "azure-functions>=1.17,<2.0.0",
     "pydantic>=2.0,<3.0",
 ]
 
