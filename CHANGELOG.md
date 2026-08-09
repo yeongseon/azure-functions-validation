@@ -1,6 +1,29 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.9.0] - 2026-08-09
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deps)* Cap azure-functions below 2.0.0 (#285) 
+- *(deps)* Bump github/codeql-action/analyze from 4.37.3 to 4.37.6 (#281) 
+- *(deps)* Bump github/codeql-action/init from 4.37.3 to 4.37.6 (#280) 
+- *(deps)* Bump ruff from 0.16.0 to 0.16.1 (#279) 
+- *(deps)* Bump azure/login from 3.0.0 to 3.0.1 (#282) 
+
+### 💼 Other
+
+- Bump version to 0.9.0 
+
+### 🚀 Features
+
+- *(decorator)* Warn when @validate_http is applied above @with_context (#278) 
+- *(decorator)* Write endpoint namespace in _make_wrapper (#275) 
+- *(metadata)* Define endpoint namespace SPEC and JSON Schema (#274) 
+
+### 🧪 Testing
+
+- *(metadata)* Add _metadata_helpers byte-identical drift test (#276) 
 ## [0.8.1] - 2026-08-06
 
 ### ⚙️ Miscellaneous Tasks
@@ -14,6 +37,10 @@ All notable changes to this project will be documented in this file.
 ### 💼 Other
 
 - Bump version to 0.8.1 
+
+### 📚 Documentation
+
+- Update changelog 
 ## [0.8.0] - 2026-08-04
 
 ### Deprecate
