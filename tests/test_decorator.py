@@ -330,3 +330,75 @@ class TestLoggingDecoratorOrder:
         wrapped = validate_http(body=UserModel)(handler)
         assert wrapped is not handler
         assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)
+
+
+
+# ---------------------------------------------------------------------------
+# Worker-indexing regression: handlers declaring (req, context) (issue #284)
+# ---------------------------------------------------------------------------
+
+
+class TestReqContextWorkerIndexing:
+    """Lock worker-compat behavior for handlers that declare ``(req, context)``.
+
+    The Azure Functions worker indexes a handler by its exposed signature and
+    ``co_argcount``. ``@validate_http`` must keep the exposed signature a single
+    ``req`` parameter, clear annotations, and avoid ``__wrapped__`` even when the
+    original handler also declares a worker-injected ``context`` binding, while
+    still forwarding ``context`` through to the handler at call time.
+    """
+
+    def test_sync_exposes_single_req_signature(self) -> None:
+        import inspect
+
+        @validate_http(query=QueryModel)
+        def handler(req: HttpRequest, context: object) -> HttpResponse:
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req"]
+        assert handler.__annotations__ == {}
+        assert not hasattr(handler, "__wrapped__")
+
+    def test_sync_forwards_context_and_returns_success(self) -> None:
+        from azure_functions_validation.testing import MockHttpRequest
+
+        seen: dict[str, object] = {}
+
+        @validate_http(query=QueryModel)
+        def handler(req: HttpRequest, context: object, query: QueryModel) -> HttpResponse:
+            seen["context"] = context
+            seen["query"] = query
+            return HttpResponse("ok")
+
+        sentinel = object()
+        response = handler(MockHttpRequest(params={"limit": "5"}), context=sentinel)
+
+        assert response.status_code == 200
+        assert seen["context"] is sentinel
+        assert isinstance(seen["query"], QueryModel)
+        assert seen["query"].limit == 5
+
+    @pytest.mark.anyio
+    async def test_async_exposes_single_req_and_forwards_context(self) -> None:
+        import inspect
+
+        from azure_functions_validation.testing import MockHttpRequest
+
+        seen: dict[str, object] = {}
+
+        @validate_http(query=QueryModel)
+        async def handler(
+            req: HttpRequest, context: object, query: QueryModel
+        ) -> HttpResponse:
+            seen["context"] = context
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req"]
+        assert handler.__annotations__ == {}
+        assert not hasattr(handler, "__wrapped__")
+
+        sentinel = object()
+        response = await handler(MockHttpRequest(params={"limit": "5"}), context=sentinel)
+
+        assert response.status_code == 200
+        assert seen["context"] is sentinel
