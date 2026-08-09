@@ -2,8 +2,9 @@
 
 Status: **v1** · Owner namespace: `endpoint` · Issue: [#271](https://github.com/yeongseon/azure-functions-validation-python/issues/271) · Umbrella: [#270](https://github.com/yeongseon/azure-functions-validation-python/issues/270)
 
-> **Localization:** This specification is a canonical, English-only technical
-> document (the machine-readable source of truth is the JSON Schema it links to).
+> **Localization:** This specification is an English-only technical document
+> (the JSON Schema it links to is an internal conformance artifact of this
+> package, not a source of truth other packages bind to).
 > It is intentionally **not** part of the translated README set
 > (`README.ko.md`, `README.ja.md`, `README.zh-CN.md`) and requires no translation
 > updates when it changes.
@@ -55,7 +56,7 @@ its own local conformance tests against the versioned dict convention.
   ],
   "responses": {                    // status-code (string) -> response object; or null
     "200": { "schema": { /* JSON Schema */ } },  // "description" optional; producer omits it in v1
-    "422": { "schema": { /* validation-error envelope */ } } // present when request validation applies
+    "422": { "schema": { /* validation-error envelope */ } } // added by this producer when request validation applies
   } | null,
   "summary": "…",                   // optional
   "description": "…",               // optional
@@ -70,10 +71,27 @@ The Azure Functions route binding (`@app.route(route=…, methods=…)`) is the
 single source of truth for path and HTTP methods. The consumer derives them at
 scan time from the binding, so producers must not duplicate them here.
 
-### The `422` validation-error response
+### `responses` describes the endpoint's actual runtime responses
 
-When the operation performs request validation — i.e. any of `body`, `query`,
-`path`, or `headers` is a Pydantic model — producers MUST add a `"422"` entry to
+`responses` is a **generic** part of the convention: a producer maps each HTTP
+status code it can return to a response object carrying that response's JSON
+Schema, or emits `null` when it has nothing to describe. What those responses
+*are* is producer-specific. A non-Pydantic producer, or one that only emits
+success responses, is under no obligation to document a `422` body — it simply
+describes whatever its runtime actually returns.
+
+## azure-functions-validation implementation
+
+The rest of this document describes rules that are **specific to
+`azure-functions-validation`** — how *this* producer generates its payload. They
+are not obligations on the generic `endpoint` convention above; other producers
+of the namespace implement their own equivalents.
+
+### The `422` validation-error response (validation-specific)
+
+`@validate_http` returns a `422` on request-validation failure, so when the
+operation performs request validation — i.e. any of `body`, `query`, `path`, or
+`headers` is a Pydantic model — **this producer** adds a `"422"` entry to
 `responses` describing the standardized validation-error body the runtime
 returns on invalid input:
 
@@ -107,10 +125,12 @@ runtime body without changing this schema. Adding `422` is an additive change
 and does not bump the namespace version.
 
 
-## Canonicalization rules (producers MUST follow)
+## Canonicalization rules (validation-specific)
 
-Producers generate embedded schemas from Pydantic models with **exactly** these
-settings so output is stable and consumer-mergeable:
+`azure-functions-validation` generates its embedded schemas from Pydantic models
+with **exactly** these settings so output is stable and consumer-mergeable. This
+is how *this* producer happens to canonicalize; the generic convention only
+requires plain JSON Schema with `$defs` left unresolved:
 
 | Rule | Value |
 | --- | --- |
@@ -121,6 +141,10 @@ settings so output is stable and consumer-mergeable:
 | `$defs` | **left UNRESOLVED** — the consumer hoists them to `components/schemas` |
 | Generator class | Pydantic default `GenerateJsonSchema` (pin explicitly if customized; Pydantic minor bumps can change output) |
 | `request_body_required` | `True` unless every field of the body model has a default |
+
+The response-schema mode above applies to **Pydantic-derived response-model
+schemas**. The `422` validation-error response schema is produced directly
+(not from a Pydantic model) and is unaffected by these settings.
 
 ### Structural rule: `$defs` if `$ref`
 

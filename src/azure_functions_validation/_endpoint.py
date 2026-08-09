@@ -5,14 +5,15 @@ shared ``_azure_functions_metadata`` convention attribute:
 
 * ``"validation"`` — this package's own request/response model references
   (kept for the deprecation cycle; see :mod:`._metadata`).
-* ``"endpoint"`` — the shared, OpenAPI-ready contract consumed by
-  ``azure-functions-openapi``. Unlike the ``validation`` namespace (which
-  carries Pydantic model *classes*), the ``endpoint`` payload is entirely
+* ``"endpoint"`` — this package's local, OpenAPI-ready endpoint payload,
+  consumed by ``azure-functions-openapi``. Unlike the ``validation`` namespace
+  (which carries Pydantic model *classes*), the ``endpoint`` payload is entirely
   *self-contained* JSON Schema: the consumer needs no import of this package
   and no access to the user's model classes.
 
-The payload shape and canonicalization rules are pinned by
-``schemas/endpoint.schema.json`` and documented in ``docs/METADATA_SPEC.md``.
+This package's payload shape and canonicalization rules are checked against
+``schemas/endpoint.schema.json`` — a local conformance artifact — and
+documented in ``docs/METADATA_SPEC.md``.
 """
 
 from __future__ import annotations
@@ -24,11 +25,11 @@ from pydantic import BaseModel
 from ._metadata import _merge_namespace
 from .schemas import ENDPOINT_METADATA_VERSION, _contains_ref
 
-#: Namespace owned by the shared endpoint contract.
+#: Namespace for this package's local endpoint payload.
 ENDPOINT_NAMESPACE = "endpoint"
 
-#: Pydantic ref template pinned by the SPEC so ``$defs`` stay unresolved and the
-#: consumer (openapi) remains the sole ``$ref``-collision authority.
+#: Pydantic ref template used by this producer so ``$defs`` stay unresolved and
+#: the consumer (openapi) remains the sole ``$ref``-collision authority.
 _REF_TEMPLATE = "#/$defs/{model}"
 
 #: HTTP status code under which the standardized validation-error response is
@@ -69,6 +70,7 @@ def _validation_error_schema() -> dict[str, Any]:
         "required": ["detail"],
     }
 
+
 class EndpointMetadata(TypedDict, total=False):
     """Shape of ``_azure_functions_metadata["endpoint"]`` (schema version 1)."""
 
@@ -91,7 +93,6 @@ def _model_schema(model: type[BaseModel], mode: str) -> dict[str, Any]:
         ref_template=_REF_TEMPLATE,
         mode=mode,  # type: ignore[arg-type]
     )
-
 
 
 def _attach_defs_if_ref(
