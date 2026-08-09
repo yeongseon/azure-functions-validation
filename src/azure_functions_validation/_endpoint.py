@@ -31,6 +31,43 @@ ENDPOINT_NAMESPACE = "endpoint"
 #: consumer (openapi) remains the sole ``$ref``-collision authority.
 _REF_TEMPLATE = "#/$defs/{model}"
 
+#: HTTP status code under which the standardized validation-error response is
+#: documented. Emitted whenever request validation can fail (any of
+#: ``body``/``query``/``path``/``headers`` is a model).
+_VALIDATION_ERROR_STATUS = "422"
+
+
+def _validation_error_schema() -> dict[str, Any]:
+    """Return a self-contained JSON Schema for the ``{"detail": [...]}`` envelope.
+
+    Mirrors the runtime 422 body produced by the pipeline (see
+    ``pipeline.format_error_response``): a ``detail`` array of items with
+    ``loc`` / ``msg`` / ``type``. A fresh dict is built on every call so
+    consumers may mutate the embedded schema freely without cross-handler
+    aliasing. Contains no ``$ref``, so the ``$defs``-if-``$ref`` rule does not
+    apply.
+    """
+    return {
+        "type": "object",
+        "properties": {
+            "detail": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "loc": {
+                            "type": "array",
+                            "items": {"type": ["string", "integer"]},
+                        },
+                        "msg": {"type": "string"},
+                        "type": {"type": "string"},
+                    },
+                    "required": ["loc", "msg", "type"],
+                },
+            }
+        },
+        "required": ["detail"],
+    }
 
 class EndpointMetadata(TypedDict, total=False):
     """Shape of ``_azure_functions_metadata["endpoint"]`` (schema version 1)."""
@@ -112,29 +149,35 @@ def build_endpoint_metadata(config: Any) -> EndpointMetadata:
         request_body_required = False
 
     parameters: list[dict[str, Any]] = []
+    has_request_model = False
     for model, location in (
         (config.query, "query"),
         (config.path, "path"),
         (config.headers, "header"),
     ):
         if _is_model_type(model):
+            has_request_model = True
             parameters.extend(_build_parameters(model, location))
 
+    # A request body model also makes request validation (and thus a 422) possible.
+    has_request_model = has_request_model or _is_model_type(body)
+
+    responses: dict[str, dict[str, Any]] = {}
     response_model = config.response_model
     if _is_model_type(response_model):
         status = str(getattr(config, "success_status_code", 200) or 200)
-        responses: dict[str, dict[str, Any]] | None = {
-            status: {"schema": _model_schema(response_model, "serialization")}
-        }
-    else:
-        responses = None
+        responses[status] = {"schema": _model_schema(response_model, "serialization")}
+    if has_request_model:
+        # Document the standardized validation-error contract the runtime emits
+        # on invalid input, so consumers (openapi) need not hand-author it.
+        responses[_VALIDATION_ERROR_STATUS] = {"schema": _validation_error_schema()}
 
     payload: EndpointMetadata = {
         "version": ENDPOINT_METADATA_VERSION,
         "request_body": request_body,
         "request_body_required": request_body_required,
         "parameters": parameters,
-        "responses": responses,
+        "responses": responses or None,
     }
     return payload
 

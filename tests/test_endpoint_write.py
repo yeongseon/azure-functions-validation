@@ -9,6 +9,7 @@ request_body_required) are honoured.
 
 from __future__ import annotations
 
+import json
 from typing import Any, Mapping, cast
 
 import azure.functions as func
@@ -127,7 +128,7 @@ class TestSchemaValidity:
 
         payload = _endpoint_of(handler)
         _validate(payload)
-        assert set(payload["responses"]) == {"201"}
+        assert set(payload["responses"]) == {"201", "422"}
 
     def test_no_models(self) -> None:
         @validate_http()
@@ -140,6 +141,77 @@ class TestSchemaValidity:
         assert payload["request_body_required"] is False
         assert payload["parameters"] == []
         assert payload["responses"] is None
+
+
+# ---------------------------------------------------------------------------
+# 422 validation-error response (issue #283)
+# ---------------------------------------------------------------------------
+
+
+class TestValidationErrorResponse:
+    def test_body_only_emits_422(self) -> None:
+        @validate_http(body=CreateUser)
+        def handler(req: func.HttpRequest, body: CreateUser) -> Any:
+            return {}
+
+        payload = _endpoint_of(handler)
+        _validate(payload)
+        assert set(payload["responses"]) == {"422"}
+
+    def test_query_only_emits_422(self) -> None:
+        @validate_http(query=ListQuery)
+        def handler(req: func.HttpRequest) -> Any:
+            return {}
+
+        assert set(_endpoint_of(handler)["responses"]) == {"422"}
+
+    def test_success_and_422_coexist(self) -> None:
+        @validate_http(body=CreateUser, response_model=UserResponse, status_code=201)
+        def handler(req: func.HttpRequest, body: CreateUser) -> UserResponse:
+            return UserResponse(id=1, name=body.name)
+
+        assert set(_endpoint_of(handler)["responses"]) == {"201", "422"}
+
+    def test_response_model_only_has_no_422(self) -> None:
+        @validate_http(response_model=UserResponse)
+        def handler(req: func.HttpRequest) -> UserResponse:
+            return UserResponse(id=1, name="a")
+
+        assert set(_endpoint_of(handler)["responses"]) == {"200"}
+
+    def test_no_models_has_no_responses(self) -> None:
+        @validate_http()
+        def handler(req: func.HttpRequest) -> Any:
+            return {}
+
+        assert _endpoint_of(handler)["responses"] is None
+
+    def test_422_schema_matches_detail_envelope(self) -> None:
+        @validate_http(body=CreateUser)
+        def handler(req: func.HttpRequest, body: CreateUser) -> Any:
+            return {}
+
+        schema = _endpoint_of(handler)["responses"]["422"]["schema"]
+        assert schema["required"] == ["detail"]
+        item = schema["properties"]["detail"]["items"]
+        assert set(item["required"]) == {"loc", "msg", "type"}
+        # Self-contained: no $ref, so the $defs-if-$ref rule is a no-op.
+        assert "$ref" not in json.dumps(schema)
+        assert_defs_present_if_ref_used(schema)
+
+    def test_422_schema_is_fresh_copy_per_handler(self) -> None:
+        @validate_http(body=CreateUser)
+        def handler_a(req: func.HttpRequest, body: CreateUser) -> Any:
+            return {}
+
+        @validate_http(body=CreateUser)
+        def handler_b(req: func.HttpRequest, body: CreateUser) -> Any:
+            return {}
+
+        schema_a = _endpoint_of(handler_a)["responses"]["422"]["schema"]
+        schema_b = _endpoint_of(handler_b)["responses"]["422"]["schema"]
+        schema_a["properties"]["detail"]["_marker"] = True
+        assert "_marker" not in schema_b["properties"]["detail"]
 
 
 # ---------------------------------------------------------------------------
