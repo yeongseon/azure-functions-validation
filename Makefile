@@ -61,7 +61,7 @@ security: ensure-hatch
 
 .PHONY: check-schema-hash
 check-schema-hash: ensure-hatch
-	@$(HATCH) run python -c "import hashlib, pathlib, sys; d = pathlib.Path('src/azure_functions_validation/schemas'); expected = (d / 'endpoint.schema.sha256').read_text().split()[0]; actual = hashlib.sha256((d / 'endpoint.schema.json').read_bytes()).hexdigest(); print('endpoint.schema.json digest matches pin.') if expected == actual else sys.exit('endpoint.schema.json digest drift:\n  pinned:  ' + expected + '\n  actual:  ' + actual + '\nUpdate endpoint.schema.sha256 (and sync sibling packages) if intentional.')"
+	@$(HATCH) run python -c "import hashlib, pathlib, sys; d = pathlib.Path('src/azure_functions_validation/schemas'); expected = (d / 'endpoint.schema.sha256').read_text().split()[0]; actual = hashlib.sha256((d / 'endpoint.schema.json').read_bytes()).hexdigest(); print('endpoint.schema.json digest matches pin.') if expected == actual else sys.exit('endpoint.schema.json digest drift:\n  pinned:  ' + expected + '\n  actual:  ' + actual + '\nUpdate endpoint.schema.sha256 if this change is intentional.')"
 
 .PHONY: check
 check: ensure-hatch

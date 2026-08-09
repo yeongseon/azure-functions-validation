@@ -1,11 +1,13 @@
-"""Public schema package for the Azure Functions Python DX Toolkit.
+"""Internal schema utilities for the ``endpoint`` metadata namespace.
 
-This subpackage ships the JSON Schema for the cross-package ``endpoint``
-metadata namespace and a small, dependency-free loader. Producer packages
-(this one, ``azure-functions-langgraph``, ...) write the ``endpoint`` payload;
-consumer packages (``azure-functions-openapi``) read it. The schema is the
-single source of truth for the payload shape so the dict cannot silently
-drift across packages.
+This subpackage ships the JSON Schema for the ``endpoint`` metadata namespace
+and a small, dependency-free loader. Producer packages (this one,
+``azure-functions-langgraph``, ...) write the ``endpoint`` payload; consumer
+packages (``azure-functions-openapi``) read it. The schema is an **internal
+conformance artifact of this package** used by its own tests to keep the
+emitted dict from drifting; it is not published, dereferenced, or shared as a
+runtime contract. The payload is a **versioned dict convention** and each
+package owns its local conformance tests against it.
 
 The schema JSON is distributed as package data and loaded via
 :mod:`importlib.resources`, so it is importable at runtime without any new

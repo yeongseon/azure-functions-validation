@@ -16,29 +16,32 @@ under the conventional attribute `_azure_functions_metadata`, keyed by a
 package-owned **namespace** string. Consumers discover metadata by reading that
 attribute — never by importing the producer.
 
-The `endpoint` namespace is the **shared, OpenAPI-ready contract**. Producer
-packages (`azure-functions-validation`, `azure-functions-langgraph`, …) write
-it; the consumer (`azure-functions-openapi`) reads it and derives the OpenAPI
-spec directly, instead of reconstructing OpenAPI shapes per producer.
+The `endpoint` namespace is a **versioned, OpenAPI-ready metadata convention**.
+Producer packages (`azure-functions-validation`, `azure-functions-langgraph`, …)
+write it; the consumer (`azure-functions-openapi`) reads it and derives the
+OpenAPI spec directly, instead of reconstructing OpenAPI shapes per producer.
 
 The JSON Schema in
 [`src/azure_functions_validation/schemas/endpoint.schema.json`](../src/azure_functions_validation/schemas/endpoint.schema.json)
-is the **single source of truth** for the payload shape. Every producer
-validates its emitted payload against this schema in tests so the dict cannot
-drift.
+is an **internal conformance artifact of `azure-functions-validation`**: this
+package validates its own emitted payload against it in tests. It is not
+published, dereferenced, or shared as a runtime contract — each package owns
+its own local conformance tests against the versioned dict convention.
 
 ## Distribution & sync
 
-- The schema is a **public** subpackage
-  (`azure_functions_validation.schemas`), shipped as package data and loaded
-  via `importlib.resources`. No new runtime dependency is introduced;
-  `jsonschema` is required only to *validate* payloads and is test-only.
-- The contract is **replicated** across packages, not shared through a runtime
-  dependency (same philosophy as the vendored `_metadata_helpers.py`).
-- Drift is caught mechanically: `endpoint.schema.sha256` pins the file digest
-  and `make check-schema-hash` (wired into `make check-all`) fails on any
-  change. When you intentionally change the schema, update the pin and
-  hand-sync sibling packages in the same release train.
+- The schema ships as package data inside
+  `azure_functions_validation.schemas`, loaded via `importlib.resources`. No
+  new runtime dependency is introduced; `jsonschema` is required only to
+  *validate* payloads and is test-only.
+- The schema is an **internal conformance artifact** of this package, not a
+  shared/hosted contract. Other packages that emit the `endpoint` namespace
+  own their own local conformance tests against the same versioned dict
+  convention (same philosophy as the vendored `_metadata_helpers.py`).
+- Local drift is caught mechanically: `endpoint.schema.sha256` pins the file
+  digest and `make check-schema-hash` (wired into `make check-all`) fails on
+  any change. When you intentionally change the schema, update the pin and
+  bump the `version` field if the change is breaking.
 
 ## Payload shape (version 1)
 
@@ -145,13 +148,23 @@ alone and is enforced by
 - On a bump, update the schema, its SHA-256 pin, this spec, and every sibling
   producer/consumer in the same release train.
 
-## API
+## Internal helpers (not a public API)
 
-```python
-from azure_functions_validation.schemas import (
-    ENDPOINT_METADATA_VERSION,      # 1
-    load_endpoint_schema,           # -> dict (fresh copy)
-    endpoint_schema_sha256,         # -> hex digest of shipped bytes
-    assert_defs_present_if_ref_used # structural guard, raises ValueError
-)
-```
+This package ships a few schema helpers that it uses **for its own conformance
+tests only**. They are intentionally **not** a supported cross-package public
+API: sibling producers/consumers of the `endpoint` namespace MUST NOT import
+them, and they may change or move without a deprecation cycle. Other packages
+should implement their own local conformance checks against the versioned dict
+convention described above (the same philosophy as the vendored
+`_metadata_helpers.py`).
+
+For reference, the internal helpers this package uses in its own test suite are:
+
+- `ENDPOINT_METADATA_VERSION` — the current namespace version (`1`).
+- `load_endpoint_schema()` — returns a fresh copy of the shipped JSON Schema.
+- `endpoint_schema_sha256()` — hex digest of the shipped schema bytes.
+- `assert_defs_present_if_ref_used()` — structural guard used in tests.
+
+> These names are documented here to explain how this package validates itself,
+> not to encourage `from azure_functions_validation.schemas import ...` in other
+> packages. Treat them as internal.

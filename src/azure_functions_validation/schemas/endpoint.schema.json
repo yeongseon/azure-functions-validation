@@ -1,8 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://yeongseon.github.io/azure-functions-python-dx/endpoint.schema.json",
   "title": "Azure Functions DX Toolkit — endpoint metadata namespace (v1)",
-  "description": "Shape of _azure_functions_metadata[\"endpoint\"]. Producer packages (e.g. azure-functions-validation, azure-functions-langgraph) write this payload; consumer packages (e.g. azure-functions-openapi) read it. This contract is replicated across toolkit packages, not shared via a runtime dependency. Keep byte-identical copies in sync via the pinned SHA-256 digest.",
+  "description": "Shape of _azure_functions_metadata[\"endpoint\"]. Producer packages (e.g. azure-functions-validation, azure-functions-langgraph) write this payload; consumer packages (e.g. azure-functions-openapi) read it. This schema is an internal conformance artifact of azure-functions-validation used by its own tests; it is not published, dereferenced, or shared as a runtime contract. Each package owns its local conformance tests against the versioned dict convention.",
   "type": "object",
   "required": ["version"],
   "additionalProperties": false,
