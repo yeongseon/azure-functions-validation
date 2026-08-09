@@ -27,7 +27,7 @@
       "items": { "$ref": "#/$defs/parameter" }
     },
     "responses": {
-      "description": "Map of HTTP status code (as string) to a response object carrying the response model's JSON Schema. null when no response model is declared. Response schemas use mode='serialization'.",
+      "description": "Map of HTTP status code (as string) to a response object carrying the response's JSON Schema; null when the producer has no responses to describe. Response schemas use mode='serialization'.",
       "anyOf": [
         {
           "type": "object",
