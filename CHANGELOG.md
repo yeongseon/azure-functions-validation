@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.10.1] - 2026-08-11
+
+### 💼 Other
+
+- Bump version to 0.10.1 
+
+### 📚 Documentation
+
+- *(metadata)* Use absolute URL for endpoint schema link to fix strict mkdocs build 
+- Backfill changelog history and require cookbook dogfood verification on release 
 ## [0.10.0] - 2026-08-11
 
 ### 🐛 Bug Fixes
@@ -13,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Update changelog 
 - *(metadata)* Drop 'same release train' wording from versioning section (#296) 
 - *(metadata)* Separate generic endpoint convention from validation-specific 422/Pydantic rules (#292) 
 
