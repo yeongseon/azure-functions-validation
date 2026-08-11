@@ -1,6 +1,32 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.10.0] - 2026-08-11
+
+### 🐛 Bug Fixes
+
+- *(metadata)* Drop dead schema $id and remove public-contract claims (#289) 
+
+### 💼 Other
+
+- Bump version to 0.10.0 
+
+### 📚 Documentation
+
+- *(metadata)* Drop 'same release train' wording from versioning section (#296) 
+- *(metadata)* Separate generic endpoint convention from validation-specific 422/Pydantic rules (#292) 
+
+### 🚀 Features
+
+- *(endpoint)* Document 422 validation-error contract in endpoint metadata (#286) 
+
+### 🚜 Refactor
+
+- *(schemas)* Drop __all__ from internal schemas subpackage (#294) 
+
+### 🧪 Testing
+
+- *(decorator)* Lock worker-indexing for (req, context) handlers (#287) 
 ## [0.9.1] - 2026-08-09
 
 ### 🐛 Bug Fixes
@@ -10,6 +36,10 @@ All notable changes to this project will be documented in this file.
 ### 💼 Other
 
 - Bump version to 0.9.1 
+
+### 📚 Documentation
+
+- Update changelog 
 ## [0.9.0] - 2026-08-09
 
 ### ⚙️ Miscellaneous Tasks
