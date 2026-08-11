@@ -1,0 +1,1978 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Validation and serialization for Python-based Azure Functions">
+      
+      
+        <meta name="author" content="Yeongseon Choe">
+      
+      
+        <link rel="canonical" href="https://yeongseon.github.io/azure-functions-validation-python/changelog/">
+      
+      
+        <link rel="prev" href="../security/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Changelog - Azure Functions Validation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Azure Functions Validation" class="md-header__button md-logo" aria-label="Azure Functions Validation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Azure Functions Validation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yeongseon/azure-functions-validation-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../usage/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/basic_validation/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../development/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../security/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Security
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Azure Functions Validation" class="md-nav__button md-logo" aria-label="Azure Functions Validation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Azure Functions Validation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yeongseon/azure-functions-validation-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/basic_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/query_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query/Path/Header
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Async Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/custom_error_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Error Handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/crud_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRUD API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-scheme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Versioning Scheme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Guides
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Guides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-loc-now-carries-an-input-source-prefix-since-v080" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error loc now carries an input-source prefix (since v0.8.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrating-from-v030-to-v050" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating from v0.3.0 to v0.5.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-version-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Version History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Full Version History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v0100-2026-08-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.10.0 (2026-08-11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v091-2026-08-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.9.1 (2026-08-09)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v090-2026-08-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.9.0 (2026-08-09)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v081-2026-08-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.8.1 (2026-08-06)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v080-2026-08-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.8.0 (2026-08-04)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v070-v077-2026-04-07-2026-07-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.7.0 – v0.7.7 (2026-04-07 → 2026-07-18)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v060-2026-03-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.6.0 (2026-03-29)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v051-2026-03-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.5.1 (2026-03-14)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v050-2026-03-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.5.0 (2026-03-11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v030-2026-03-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.3.0 (2026-03-08)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v020-2025-12-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.2.0 (2025-12-28)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v010-2025-12-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.0 (2025-12-20)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-scheme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Versioning Scheme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Guides
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Guides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-loc-now-carries-an-input-source-prefix-since-v080" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error loc now carries an input-source prefix (since v0.8.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migrating-from-v030-to-v050" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating from v0.3.0 to v0.5.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-version-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Version History
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Full Version History">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v0100-2026-08-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.10.0 (2026-08-11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v091-2026-08-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.9.1 (2026-08-09)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v090-2026-08-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.9.0 (2026-08-09)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v081-2026-08-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.8.1 (2026-08-06)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v080-2026-08-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.8.0 (2026-08-04)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v070-v077-2026-04-07-2026-07-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.7.0 – v0.7.7 (2026-04-07 → 2026-07-18)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v060-2026-03-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.6.0 (2026-03-29)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v051-2026-03-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.5.1 (2026-03-14)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v050-2026-03-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.5.0 (2026-03-11)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v030-2026-03-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.3.0 (2026-03-08)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v020-2025-12-28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.2.0 (2025-12-28)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v010-2025-12-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.0 (2025-12-20)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<p>This page documents the version history and migration paths for the <code>azure-functions-validation</code> package.</p>
+<h2 id="versioning-scheme">Versioning Scheme<a class="headerlink" href="#versioning-scheme" title="Permanent link">&para;</a></h2>
+<p>This project follows Semantic Versioning (semver.org). Given a version number MAJOR.MINOR.PATCH, increment the:</p>
+<ul>
+<li>MAJOR version when you make incompatible API changes</li>
+<li>MINOR version when you add functionality in a backward compatible manner</li>
+<li>PATCH version when you make backward compatible bug fixes</li>
+</ul>
+<p>The changelog is generated from Conventional Commits using git-cliff. Breaking changes are explicitly listed under the "Breaking Changes" section for each release.</p>
+<h2 id="migration-guides">Migration Guides<a class="headerlink" href="#migration-guides" title="Permanent link">&para;</a></h2>
+<h3 id="error-loc-now-carries-an-input-source-prefix-since-v080">Error <code>loc</code> now carries an input-source prefix (since v0.8.0)<a class="headerlink" href="#error-loc-now-carries-an-input-source-prefix-since-v080" title="Permanent link">&para;</a></h3>
+<p>Validation error <code>loc</code> values are now prefixed with their input source, so a
+body field error reports <code>["body", "email"]</code> instead of <code>["email"]</code>. This
+disambiguates collisions across <code>body</code> / <code>query</code> / <code>path</code> / <code>headers</code> when the
+same field name appears in more than one source.</p>
+<ul>
+<li><strong>Before:</strong> <code>{"loc": ["email"], "msg": "Field required", "type": "missing"}</code></li>
+<li><strong>After:</strong> <code>{"loc": ["body", "email"], "msg": "Field required", "type": "missing"}</code></li>
+</ul>
+<p>If your clients parse <code>loc</code> positionally, update them to expect the leading
+source segment. For a one-release migration window, pass <code>legacy_loc=True</code> to
+<code>@validate_http</code> to restore the previous unprefixed shape:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@validate_http</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">CreateUserRequest</span><span class="p">,</span> <span class="n">legacy_loc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">...</span>
+</code></pre></div>
+<p><code>legacy_loc</code> is a temporary escape hatch and will be removed in a later release.</p>
+<h3 id="migrating-from-v030-to-v050">Migrating from v0.3.0 to v0.5.0<a class="headerlink" href="#migrating-from-v030-to-v050" title="Permanent link">&para;</a></h3>
+<p>The v0.5.0 release significantly reduced the public API surface to focus on the core validation decorator.</p>
+<ul>
+<li><strong>Global error handler removed</strong>: <code>register_global_error_handler</code> and <code>GlobalErrorHandlerRegistry</code> are deleted. Use the <code>error_formatter</code> parameter on the <code>@validate_http</code> decorator instead for per-handler or shared formatting.</li>
+<li><strong>OpenAPI utilities removed</strong>: <code>openapi.py</code> and <code>generate_422_error_schema</code> are removed. Use the <code>azure-functions-openapi</code> package for OpenAPI generation.</li>
+<li><strong>Contract testing removed</strong>: <code>contract.py</code>, <code>@contract_test</code>, and <code>verify_contracts</code> were experimental and have been removed.</li>
+<li><strong>Metadata helpers removed</strong>: <code>metadata.py</code> helpers are no longer part of the public API.</li>
+<li><strong>Exceptions merged</strong>: <code>exceptions.py</code> is merged into <code>errors.py</code>. You should now import <code>ResponseValidationError</code> directly from the package root.</li>
+</ul>
+<h2 id="full-version-history">Full Version History<a class="headerlink" href="#full-version-history" title="Permanent link">&para;</a></h2>
+<h3 id="v0100-2026-08-11">v0.10.0 (2026-08-11)<a class="headerlink" href="#v0100-2026-08-11" title="Permanent link">&para;</a></h3>
+<h4 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Document the 422 validation-error contract in endpoint metadata (#286)</li>
+</ul>
+<h4 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Drop dead schema <code>$id</code> and remove public-contract claims from metadata (#289)</li>
+</ul>
+<h4 id="internal">Internal<a class="headerlink" href="#internal" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Drop <code>__all__</code> from the internal <code>schemas</code> subpackage (#294)</li>
+<li>Lock worker-indexing regression for <code>(req, context)</code> handlers (#287)</li>
+<li>Separate generic endpoint convention from validation-specific 422/Pydantic rules (#292)</li>
+</ul>
+<h3 id="v091-2026-08-09">v0.9.1 (2026-08-09)<a class="headerlink" href="#v091-2026-08-09" title="Permanent link">&para;</a></h3>
+<h4 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Drop <code>src/</code>-prefixed force-include so the wheel builds from the sdist</li>
+</ul>
+<h3 id="v090-2026-08-09">v0.9.0 (2026-08-09)<a class="headerlink" href="#v090-2026-08-09" title="Permanent link">&para;</a></h3>
+<h4 id="features_1">Features<a class="headerlink" href="#features_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Warn when <code>@validate_http</code> is applied above <code>@with_context</code> (azure-functions-logging interop) (#278)</li>
+<li>Define the endpoint-namespace SPEC and JSON Schema, and write the namespace in <code>_make_wrapper</code> (#274, #275)</li>
+</ul>
+<h4 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Add a byte-identical drift test for <code>_metadata_helpers</code> (#276)</li>
+</ul>
+<h3 id="v081-2026-08-06">v0.8.1 (2026-08-06)<a class="headerlink" href="#v081-2026-08-06" title="Permanent link">&para;</a></h3>
+<h4 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Correct wrong-order detection, 500 log attribution, and error-envelope stability</li>
+</ul>
+<h3 id="v080-2026-08-04">v0.8.0 (2026-08-04)<a class="headerlink" href="#v080-2026-08-04" title="Permanent link">&para;</a></h3>
+<h4 id="features_2">Features<a class="headerlink" href="#features_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Source-prefix validation error <code>loc</code> values (e.g. <code>["body", "email"]</code>); see the migration guide above</li>
+<li>Support <code>status_code=</code> and a public <code>HttpError</code> for controlled error responses</li>
+<li>Ship the <code>MockHttpRequest</code> test helper</li>
+<li>Add the <code>error_format_version</code> stability field to the error envelope</li>
+<li>Export <code>ValidationAdapter</code> and <code>PydanticAdapter</code></li>
+</ul>
+<h4 id="deprecated">Deprecated<a class="headerlink" href="#deprecated" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Warn on <code>request_model=</code> in favor of <code>body=</code> (#228)</li>
+</ul>
+<h4 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Warn instead of silently disabling validation on wrong decorator order</li>
+<li>Log response-validation 500s with <code>exc_info</code></li>
+</ul>
+<h4 id="internal_1">Internal<a class="headerlink" href="#internal_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Pin <code>azure-functions&gt;=1.17</code> and drop the optional-import rule</li>
+<li>Adopt the canonical <code>copy_identity_attrs</code> helper (#231, #232)</li>
+</ul>
+<h3 id="v070-v077-2026-04-07-2026-07-18">v0.7.0 – v0.7.7 (2026-04-07 → 2026-07-18)<a class="headerlink" href="#v070-v077-2026-04-07-2026-07-18" title="Permanent link">&para;</a></h3>
+<h4 id="features_3">Features<a class="headerlink" href="#features_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Expose <code>ValidationMetadata</code> and <code>get_validation_metadata</code> for the OpenAPI bridge (#143, #153)</li>
+<li>Write convention-based <code>_azure_functions_toolkit_metadata</code> for cross-repo toolkit interop (#157)</li>
+<li>Add automatic GitHub Release creation on tag push (#112)</li>
+</ul>
+<h4 id="fixed_4">Fixed<a class="headerlink" href="#fixed_4" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Handle <code>FunctionBuilder</code> from the azure-functions SDK in <code>validate_http</code> (#173)</li>
+<li>Correct invalid-JSON status code (422 → 400) (#137)</li>
+<li>Handle custom error-formatter exceptions safely (#119)</li>
+<li>Isolate wrapper <code>__dict__</code> from the handler to prevent metadata leak</li>
+</ul>
+<h4 id="internal_2">Internal<a class="headerlink" href="#internal_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Decouple the adapter contract and harden worker-compat (#210, #224)</li>
+<li>Raise coverage to 95%+ and enforce it via AGENTS.md and <code>pyproject.toml</code></li>
+<li>Pin external actions to commit SHAs and document the policy (#204)</li>
+</ul>
+<h3 id="v060-2026-03-29">v0.6.0 (2026-03-29)<a class="headerlink" href="#v060-2026-03-29" title="Permanent link">&para;</a></h3>
+<h4 id="features_4">Features<a class="headerlink" href="#features_4" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Normalize error paths in validation pipeline (#104)</li>
+<li>Support broader return types in response serialization (#102)</li>
+<li>Cache TypeAdapter at decoration time to avoid per-request allocation (#101)</li>
+</ul>
+<h4 id="tests_1">Tests<a class="headerlink" href="#tests_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Docs-runtime sync verification tests for README examples (#110)</li>
+<li>Golden snapshot tests for error response shapes (400/422/500) (#109)</li>
+</ul>
+<h4 id="internal_3">Internal<a class="headerlink" href="#internal_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Update README with Azure Functions Python DX Toolkit branding</li>
+<li>CI/CD workflow unification</li>
+</ul>
+<h3 id="v051-2026-03-14">v0.5.1 (2026-03-14)<a class="headerlink" href="#v051-2026-03-14" title="Permanent link">&para;</a></h3>
+<h4 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Switched to <code>TypeAdapter</code> for response validation; pass through native Pydantic v2 error types</li>
+<li>Modernized type annotations to PEP 604 (<code>X | Y</code> instead of <code>Optional[X]</code>)</li>
+</ul>
+<h4 id="fixed_5">Fixed<a class="headerlink" href="#fixed_5" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Guard against <code>UnicodeDecodeError</code> when parsing non-UTF-8 request bodies</li>
+<li>Harden error handling hierarchy: body → 400/422, query/path/headers → 400/422, unexpected → 500</li>
+<li>Sanitize 500 error responses to prevent leaking internal details</li>
+</ul>
+<h4 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Test coverage for <code>UnicodeDecodeError</code>, query/path/headers error branches, and 500 sanitization</li>
+<li>CRUD API example (<code>examples/crud_api</code>) with 21 smoke tests covering list, get, create, update, delete</li>
+<li>Unified tooling: Ruff (lint + format), pre-commit hooks, standardized Makefile</li>
+<li>Comprehensive documentation overhaul (MkDocs site with 15+ pages)</li>
+<li>Translated README files (Korean, Japanese, Chinese)</li>
+<li>Runnable examples with smoke tests</li>
+</ul>
+<h4 id="docs">Docs<a class="headerlink" href="#docs" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Remove stale <code>register_global_error_handler</code> and <code>metadata.py</code> references from docs</li>
+<li>Update architecture docs to reflect v0.5.0 module structure</li>
+<li>Add <code>request_model</code> shorthand example to usage guide</li>
+<li>Add CRUD API example documentation to mkdocs site</li>
+<li>Standardized nav structure and documentation quality across ecosystem</li>
+</ul>
+<h3 id="v050-2026-03-11">v0.5.0 (2026-03-11)<a class="headerlink" href="#v050-2026-03-11" title="Permanent link">&para;</a></h3>
+<h4 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Removed <code>registry.py</code> — <code>register_global_error_handler()</code> and <code>GlobalErrorHandlerRegistry</code> deleted</li>
+<li>Removed <code>openapi.py</code> — <code>generate_422_error_schema()</code> deleted</li>
+<li>Removed <code>contract.py</code> — <code>@contract_test</code> and <code>verify_contracts()</code> deleted</li>
+<li>Removed <code>metadata.py</code></li>
+<li>Removed <code>exceptions.py</code> — merged into <code>errors.py</code></li>
+<li>Public API reduced to 3 exports: <code>validate_http</code>, <code>ErrorFormatter</code>, <code>ResponseValidationError</code></li>
+</ul>
+<h4 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Split <code>decorator.py</code> into <code>decorator.py</code> (config/wiring), <code>pipeline.py</code> (runtime engine), <code>errors.py</code> (error types/formatting)</li>
+<li>Rewrote all documentation: README, PRD, DESIGN.md, api.md aligned with actual implementation</li>
+<li>Removed demo directory and assets</li>
+<li>Removed <code>openapi_aligned_validation</code> example</li>
+</ul>
+<h4 id="improved">Improved<a class="headerlink" href="#improved" title="Permanent link">&para;</a></h4>
+<ul>
+<li>120 tests, 98% coverage (up from 72 tests)</li>
+<li>0 lint, 0 type errors, 0 security issues</li>
+<li><code>make check-all</code> passes cleanly</li>
+</ul>
+<h3 id="v030-2026-03-08">v0.3.0 (2026-03-08)<a class="headerlink" href="#v030-2026-03-08" title="Permanent link">&para;</a></h3>
+<h4 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Contract testing utilities MVP</li>
+<li>OpenAPI integration utilities for 422 error schemas</li>
+<li>Global error handler registration</li>
+<li>Custom error formatter hook</li>
+<li>Comprehensive HTTP validation for Azure Functions</li>
+<li>Technical design documentation</li>
+</ul>
+<h4 id="fixed_6">Fixed<a class="headerlink" href="#fixed_6" title="Permanent link">&para;</a></h4>
+<ul>
+<li>HTTP validation code quality issues</li>
+<li>Test failures and related code quality regressions</li>
+</ul>
+<h4 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Project metadata and repository tooling</li>
+<li>CI and GitHub templates</li>
+<li>Version management for the 0.3.0 release</li>
+<li>Documentation updates for PRD, process, and error handling</li>
+</ul>
+<h3 id="v020-2025-12-28">v0.2.0 (2025-12-28)<a class="headerlink" href="#v020-2025-12-28" title="Permanent link">&para;</a></h3>
+<h4 id="added_2">Added<a class="headerlink" href="#added_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Core validation adapter with Pydantic v2</li>
+</ul>
+<h4 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Version management for the 0.2.0 release</li>
+</ul>
+<h3 id="v010-2025-12-20">v0.1.0 (2025-12-20)<a class="headerlink" href="#v010-2025-12-20" title="Permanent link">&para;</a></h3>
+<h4 id="added_3">Added<a class="headerlink" href="#added_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Initial package layout and scaffolding</li>
+<li>Public API export</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/yeongseon/azure-functions-validation-python" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11.14.0/dist/mermaid.min.js"></script>
+      
+        <script src="../javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
+</html>

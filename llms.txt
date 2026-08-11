@@ -1,0 +1,25 @@
+# Azure Functions Validation
+
+> Validation and serialization layer for the Azure Functions Python v2 programming model.
+
+Part of the **Azure Functions Python DX Toolkit**. Pydantic-powered request validation and response serialization for HTTP-triggered functions — validate body, query, path, and header parameters with a decorator, bringing a FastAPI-like developer experience to Azure Functions. Install from PyPI with `pip install azure-functions-validation`.
+
+## Getting Started
+- [Installation](https://yeongseon.github.io/azure-functions-validation-python/installation/): Install the package.
+- [Quickstart](https://yeongseon.github.io/azure-functions-validation-python/getting-started/): Minimal end-to-end example.
+- [Configuration](https://yeongseon.github.io/azure-functions-validation-python/configuration/): Customize validation behavior.
+
+## User Guide
+- [Usage](https://yeongseon.github.io/azure-functions-validation-python/usage/): Decorator reference and models.
+- [Architecture](https://yeongseon.github.io/azure-functions-validation-python/architecture/): How the validation pipeline works.
+
+## Examples
+- [Basic Validation](https://yeongseon.github.io/azure-functions-validation-python/examples/basic_validation/): Body validation.
+- [Query/Path/Header](https://yeongseon.github.io/azure-functions-validation-python/examples/query_validation/): Non-body parameters.
+- [Async Validation](https://yeongseon.github.io/azure-functions-validation-python/examples/async_validation/): Async handlers.
+- [CRUD API](https://yeongseon.github.io/azure-functions-validation-python/examples/crud_api/): Full example.
+
+## Reference
+- [API Reference](https://yeongseon.github.io/azure-functions-validation-python/api/): Public API surface.
+- [FAQ](https://yeongseon.github.io/azure-functions-validation-python/faq/): Frequently asked questions.
+- [Troubleshooting](https://yeongseon.github.io/azure-functions-validation-python/troubleshooting/): Common issues and fixes.

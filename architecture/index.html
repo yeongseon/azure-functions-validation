@@ -1,0 +1,2119 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Validation and serialization for Python-based Azure Functions">
+      
+      
+        <meta name="author" content="Yeongseon Choe">
+      
+      
+        <link rel="canonical" href="https://yeongseon.github.io/azure-functions-validation-python/architecture/">
+      
+      
+        <link rel="prev" href="../usage/">
+      
+      
+        <link rel="next" href="../examples/basic_validation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Architecture - Azure Functions Validation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Azure Functions Validation" class="md-header__button md-logo" aria-label="Azure Functions Validation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Azure Functions Validation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yeongseon/azure-functions-validation-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../usage/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../examples/basic_validation/" class="md-tabs__link">
+          
+  
+  
+  Examples
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../development/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../security/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Security
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Azure Functions Validation" class="md-nav__button md-logo" aria-label="Azure Functions Validation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Azure Functions Validation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yeongseon/azure-functions-validation-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-level flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module responsibilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module responsibilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#decoratorpy-public-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decorator.py (public entry point)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy-internal-execution-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py (internal execution engine)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adapterpy-validation-backend-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        adapter.py (validation backend abstraction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errorspy-error-types-and-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        errors.py (error types and formatting)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module boundaries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module boundaries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-this-package-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this package owns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-this-package-does-not-own" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this package does not own
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pydantic-v2-adapter-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pydantic v2 adapter pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-immutable-pipeline-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Immutable pipeline configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-keyword-only-decorator-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Keyword-only decorator parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-syncasync-wrapper-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Sync/async wrapper selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-import-time-configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Import-time configuration validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invariants-and-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants and guarantees
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anti-patterns-to-avoid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-patterns to avoid
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/basic_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/query_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query/Path/Header
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/async_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Async Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/custom_error_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Error Handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/crud_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRUD API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guidelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-level flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module responsibilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module responsibilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#decoratorpy-public-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        decorator.py (public entry point)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinepy-internal-execution-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline.py (internal execution engine)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adapterpy-validation-backend-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        adapter.py (validation backend abstraction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errorspy-error-types-and-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        errors.py (error types and formatting)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module boundaries
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module boundaries">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-this-package-owns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this package owns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-this-package-does-not-own" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this package does not own
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-api-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public API Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-pydantic-v2-adapter-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pydantic v2 adapter pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-immutable-pipeline-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Immutable pipeline configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-keyword-only-decorator-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Keyword-only decorator parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-syncasync-wrapper-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Sync/async wrapper selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-import-time-configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Import-time configuration validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#invariants-and-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariants and guarantees
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anti-patterns-to-avoid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Anti-patterns to avoid
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<p><code>azure-functions-validation</code> is intentionally small, explicit, and composable.
+The package centers on one public abstraction: a decorator that enforces request
+and response contracts around Azure Functions HTTP handlers.</p>
+<h2 id="design-objectives">Design Objectives<a class="headerlink" href="#design-objectives" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Keep public API minimal.</li>
+<li>Keep runtime validation deterministic.</li>
+<li>Separate framework integration from validation mechanics.</li>
+<li>Favor typed contracts over ad-hoc request parsing.</li>
+<li>Avoid global mutable configuration.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Mental model</p>
+<p>The decorator builds a pipeline once at import time and executes that
+pipeline for each request.</p>
+</div>
+<h2 id="high-level-flow">High-level flow<a class="headerlink" href="#high-level-flow" title="Permanent link">&para;</a></h2>
+<div class="mermaid">sequenceDiagram
+    participant Client as HTTP Client
+    participant AZ as Azure Functions
+    participant DEC as @validate_http
+    participant PL as pipeline.py
+    participant AD as adapter.py
+    participant ERR as errors.py
+    participant H as Handler
+
+    Client-&gt;&gt;AZ: HTTP Request
+    AZ-&gt;&gt;DEC: HttpRequest
+    DEC-&gt;&gt;PL: run_pipeline(config, req)
+    PL-&gt;&gt;AD: parse body / query / path / headers
+
+    alt validation passes
+        AD--&gt;&gt;PL: typed arguments
+        PL-&gt;&gt;H: handler(req, body, query, ...)
+        H--&gt;&gt;PL: return value
+        PL-&gt;&gt;AD: validate response_model (optional)
+        AD--&gt;&gt;PL: (content, content_type)
+        PL--&gt;&gt;Client: HttpResponse (200 OK)
+    else validation fails
+        AD--&gt;&gt;PL: ValidationError
+        PL-&gt;&gt;ERR: format_error_response
+        ERR--&gt;&gt;Client: 422 Unprocessable Entity {"detail": [...]}
+    else handler error
+        H--&gt;&gt;PL: exception
+        PL-&gt;&gt;ERR: format_error_response
+        ERR--&gt;&gt;Client: 500 Internal Server Error
+    end</div>
+<p>This flow is shared by sync and async handlers.</p>
+<h2 id="module-responsibilities">Module responsibilities<a class="headerlink" href="#module-responsibilities" title="Permanent link">&para;</a></h2>
+<h3 id="decoratorpy-public-entry-point"><code>decorator.py</code> (public entry point)<a class="headerlink" href="#decoratorpy-public-entry-point" title="Permanent link">&para;</a></h3>
+<p>Owns:</p>
+<ul>
+<li><code>validate_http(...)</code> API</li>
+<li>import-time configuration checks</li>
+<li>sync/async wrapper selection</li>
+<li>creation of immutable pipeline configuration</li>
+</ul>
+<p>Not responsible for:</p>
+<ul>
+<li>actual per-request parsing and serialization logic</li>
+</ul>
+<h3 id="pipelinepy-internal-execution-engine"><code>pipeline.py</code> (internal execution engine)<a class="headerlink" href="#pipelinepy-internal-execution-engine" title="Permanent link">&para;</a></h3>
+<p>Owns:</p>
+<ul>
+<li><code>PipelineConfig</code> data structure</li>
+<li>request object resolution</li>
+<li>input parsing orchestration</li>
+<li>response validation and serialization orchestration</li>
+</ul>
+<p>Primary internal entry points:</p>
+<ul>
+<li><code>run_pipeline(...)</code></li>
+<li><code>run_pipeline_async(...)</code></li>
+</ul>
+<h3 id="adapterpy-validation-backend-abstraction"><code>adapter.py</code> (validation backend abstraction)<a class="headerlink" href="#adapterpy-validation-backend-abstraction" title="Permanent link">&para;</a></h3>
+<p>Owns:</p>
+<ul>
+<li>adapter protocol shape (<code>ValidationAdapter</code>)</li>
+<li>default implementation (<code>PydanticAdapter</code>)</li>
+<li>source parsing semantics (body/query/path/headers)</li>
+<li>serialization and default error formatting</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Extensibility</p>
+<p>The adapter abstraction exists for advanced usage. Most deployments should
+keep the default <code>PydanticAdapter</code>.</p>
+</div>
+<h3 id="errorspy-error-types-and-formatting"><code>errors.py</code> (error types and formatting)<a class="headerlink" href="#errorspy-error-types-and-formatting" title="Permanent link">&para;</a></h3>
+<p>Owns:</p>
+<ul>
+<li><code>ResponseValidationError</code></li>
+<li><code>ErrorFormatter</code> alias</li>
+<li><code>format_error_response(...)</code></li>
+</ul>
+<p>Error shaping policy:</p>
+<ul>
+<li>validation/parsing errors use structured JSON payloads</li>
+<li>500-level internal errors are sanitized by default unless a custom formatter
+  is provided</li>
+</ul>
+<h2 id="module-boundaries">Module boundaries<a class="headerlink" href="#module-boundaries" title="Permanent link">&para;</a></h2>
+<div class="mermaid">flowchart LR
+    DEC["decorator.py\n@validate_http"]
+    PL["pipeline.py\nrun_pipeline()"]
+    AD["adapter.py\nPydanticAdapter"]
+    ERR["errors.py\nResponseValidationError"]
+
+    DEC -- "creates PipelineConfig" --&gt; PL
+    PL -- "delegates parsing\n+ serialization" --&gt; AD
+    PL -- "on error" --&gt; ERR
+    AD -- "raises" --&gt; ERR</div>
+<h3 id="what-this-package-owns">What this package owns<a class="headerlink" href="#what-this-package-owns" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request extraction</td>
+<td>Parse body/query/path/headers from <code>HttpRequest</code></td>
+</tr>
+<tr>
+<td>Runtime validation</td>
+<td>Enforce Pydantic contracts before handler execution</td>
+</tr>
+<tr>
+<td>Response enforcement</td>
+<td>Validate outbound payloads against <code>response_model</code></td>
+</tr>
+<tr>
+<td>Error envelope policy</td>
+<td>Emit consistent <code>{"detail": [...]}</code> validation payloads</td>
+</tr>
+<tr>
+<td>Decorator semantics</td>
+<td>Injection names and conflict rules</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-this-package-does-not-own">What this package does not own<a class="headerlink" href="#what-this-package-does-not-own" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Azure Functions route registration mechanics</li>
+<li>Authentication and authorization</li>
+<li>Business/domain logic</li>
+<li>Data persistence</li>
+<li>OpenAPI specification generation or documentation rendering (owned by <a href="https://github.com/yeongseon/azure-functions-openapi"><code>azure-functions-openapi</code></a>; use <code>register_openapi_metadata()</code> to register a similar core metadata shape programmatically)</li>
+<li>LangGraph runtime exposure or graph deployment (owned by <a href="https://github.com/yeongseon/azure-functions-langgraph"><code>azure-functions-langgraph</code></a>)</li>
+</ul>
+<h2 id="public-api-boundary">Public API Boundary<a class="headerlink" href="#public-api-boundary" title="Permanent link">&para;</a></h2>
+<p>Exported symbols (via <code>__all__</code>):</p>
+<ul>
+<li><code>validate_http</code> — decorator for HTTP request/response validation</li>
+<li><code>ResponseValidationError</code> — exception type for response model validation failures</li>
+<li><code>SerializationError</code> — exception type for response serialization failures</li>
+<li><code>ErrorFormatter</code> — type alias for custom error formatting callables</li>
+<li><code>__version__</code> — package version string</li>
+</ul>
+<p>Everything else (<code>PipelineConfig</code>, <code>PydanticAdapter</code>, <code>ValidationAdapter</code> protocol, internal pipeline functions) is not part of the top-level public API.</p>
+<h2 id="key-design-decisions">Key Design Decisions<a class="headerlink" href="#key-design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="1-pydantic-v2-adapter-pattern">1. Pydantic v2 adapter pattern<a class="headerlink" href="#1-pydantic-v2-adapter-pattern" title="Permanent link">&para;</a></h3>
+<p>Validation is delegated to a <code>ValidationAdapter</code> protocol. The default <code>PydanticAdapter</code> uses Pydantic v2 for validation and type coercion. The protocol exists for extensibility but most deployments should use the default.</p>
+<h3 id="2-immutable-pipeline-configuration">2. Immutable pipeline configuration<a class="headerlink" href="#2-immutable-pipeline-configuration" title="Permanent link">&para;</a></h3>
+<p><code>PipelineConfig</code> captures all decorator parameters at decoration time and is frozen for the lifetime of the handler. Per-request validation reuses the same config without mutation.</p>
+<h3 id="3-keyword-only-decorator-parameters">3. Keyword-only decorator parameters<a class="headerlink" href="#3-keyword-only-decorator-parameters" title="Permanent link">&para;</a></h3>
+<p><code>validate_http(...)</code> accepts only keyword arguments. This prevents positional-argument mistakes and makes call sites self-documenting.</p>
+<h3 id="4-syncasync-wrapper-selection">4. Sync/async wrapper selection<a class="headerlink" href="#4-syncasync-wrapper-selection" title="Permanent link">&para;</a></h3>
+<p>The decorator inspects the handler at decoration time and selects either <code>_sync_wrapper</code> or <code>_async_wrapper</code>. No runtime branching per request.</p>
+<h3 id="5-import-time-configuration-validation">5. Import-time configuration validation<a class="headerlink" href="#5-import-time-configuration-validation" title="Permanent link">&para;</a></h3>
+<p>Invalid decorator configuration (e.g. conflicting parameters) raises exceptions at decoration time (typically module import). This fails fast rather than surfacing errors only at request time.</p>
+<h2 id="invariants-and-guarantees">Invariants and guarantees<a class="headerlink" href="#invariants-and-guarantees" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>validate_http</code> parameters are keyword-only.</li>
+<li>first positional handler parameter must be request-like.</li>
+<li><code>request_model</code> cannot be combined with other request source parameters.</li>
+<li>response model validation runs unless handler returns <code>HttpResponse</code> directly.</li>
+<li>custom formatter is handler-scoped.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Import-time failures</p>
+<p>Invalid decorator configuration raises exceptions when modules are imported,
+not only at request time.</p>
+</div>
+<h2 id="anti-patterns-to-avoid">Anti-patterns to avoid<a class="headerlink" href="#anti-patterns-to-avoid" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Anti-pattern</th>
+<th>Why it causes problems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reimplementing request parsing inside handlers</td>
+<td>Duplicates validation logic and increases drift</td>
+</tr>
+<tr>
+<td>Skipping <code>response_model</code> on public APIs</td>
+<td>Allows accidental contract breakage</td>
+</tr>
+<tr>
+<td>Coupling this package to external API documentation types</td>
+<td>Reduces modularity and maintainability</td>
+</tr>
+<tr>
+<td>Overusing custom formatters everywhere</td>
+<td>Fragments client error handling contracts</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-documents">Related Documents<a class="headerlink" href="#related-documents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../usage/">Usage</a></li>
+<li><a href="../configuration/">Configuration</a></li>
+<li><a href="../api/">API Reference</a></li>
+<li><a href="../troubleshooting/">Troubleshooting</a></li>
+</ul>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python">Azure Functions Python developer reference</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger">Azure Functions HTTP trigger</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages">Supported languages in Azure Functions</a></li>
+</ul>
+<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/yeongseon/azure-functions-langgraph">azure-functions-langgraph — Architecture</a> — LangGraph deployment adapter</li>
+<li><a href="https://github.com/yeongseon/azure-functions-openapi">azure-functions-openapi — Architecture</a> — OpenAPI spec generation and Swagger UI</li>
+<li><a href="https://github.com/yeongseon/azure-functions-logging">azure-functions-logging — Architecture</a> — Structured logging with contextvars</li>
+<li><a href="https://github.com/yeongseon/azure-functions-doctor">azure-functions-doctor — Architecture</a> — Pre-deploy diagnostic CLI</li>
+<li><a href="https://github.com/yeongseon/azure-functions-scaffold">azure-functions-scaffold — Architecture</a> — Project scaffolding CLI</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/yeongseon/azure-functions-validation-python" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11.14.0/dist/mermaid.min.js"></script>
+      
+        <script src="../javascripts/mermaid-init.js"></script>
+      
+    
+  </body>
+</html>
