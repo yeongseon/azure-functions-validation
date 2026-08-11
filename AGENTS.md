@@ -93,6 +93,11 @@ When splitting a large piece of work into focused issues, keep the umbrella open
 2. This runs: `hatch version` → `git commit` → `make changelog` → `git commit` → `git tag` → `git push`
 3. Tag push triggers **Publish to PyPI** GitHub Actions workflow automatically.
 4. Update `docs/changelog.md` separately if needed (different format from `CHANGELOG.md`).
+5. **Verify the release against the dogfood cookbook.** Once **Publish to PyPI** succeeds, confirm the downstream consumer still passes on the freshly published version:
+   - In [`azure-functions-cookbook-python`](https://github.com/yeongseon/azure-functions-cookbook-python), upgrade to the new release (`hatch run pip install -U "azure-functions-validation>=X.Y,<1"`) and run `make test`.
+   - Treat any new `RuntimeWarning`/`DeprecationWarning` from `@validate_http` as a release-blocking signal — the library surfaces decorator-order and API-drift problems as warnings, so a clean run (zero validation warnings) is part of the release gate.
+   - If the cookbook pins a lower bound (`azure-functions-validation>=X.Y,<1`), bump it to the new minor in the same verification PR so examples are tested against the version they advertise.
+   - A release is **not** considered done until the cookbook passes on the published version.
 
 ## Golden Commands
 

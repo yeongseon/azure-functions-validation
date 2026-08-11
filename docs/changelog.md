@@ -14,7 +14,7 @@ The changelog is generated from Conventional Commits using git-cliff. Breaking c
 
 ## Migration Guides
 
-### Error `loc` now carries an input-source prefix (upcoming minor)
+### Error `loc` now carries an input-source prefix (since v0.8.0)
 
 Validation error `loc` values are now prefixed with their input source, so a
 body field error reports `["body", "email"]` instead of `["email"]`. This
@@ -48,6 +48,92 @@ The v0.5.0 release significantly reduced the public API surface to focus on the 
 - **Exceptions merged**: `exceptions.py` is merged into `errors.py`. You should now import `ResponseValidationError` directly from the package root.
 
 ## Full Version History
+
+### v0.10.0 (2026-08-11)
+
+#### Features
+
+- Document the 422 validation-error contract in endpoint metadata (#286)
+
+#### Fixed
+
+- Drop dead schema `$id` and remove public-contract claims from metadata (#289)
+
+#### Internal
+
+- Drop `__all__` from the internal `schemas` subpackage (#294)
+- Lock worker-indexing regression for `(req, context)` handlers (#287)
+- Separate generic endpoint convention from validation-specific 422/Pydantic rules (#292)
+
+### v0.9.1 (2026-08-09)
+
+#### Fixed
+
+- Drop `src/`-prefixed force-include so the wheel builds from the sdist
+
+### v0.9.0 (2026-08-09)
+
+#### Features
+
+- Warn when `@validate_http` is applied above `@with_context` (azure-functions-logging interop) (#278)
+- Define the endpoint-namespace SPEC and JSON Schema, and write the namespace in `_make_wrapper` (#274, #275)
+
+#### Tests
+
+- Add a byte-identical drift test for `_metadata_helpers` (#276)
+
+### v0.8.1 (2026-08-06)
+
+#### Fixed
+
+- Correct wrong-order detection, 500 log attribution, and error-envelope stability
+
+### v0.8.0 (2026-08-04)
+
+#### Features
+
+- Source-prefix validation error `loc` values (e.g. `["body", "email"]`); see the migration guide above
+- Support `status_code=` and a public `HttpError` for controlled error responses
+- Ship the `MockHttpRequest` test helper
+- Add the `error_format_version` stability field to the error envelope
+- Export `ValidationAdapter` and `PydanticAdapter`
+
+#### Deprecated
+
+- Warn on `request_model=` in favor of `body=` (#228)
+
+#### Fixed
+
+- Warn instead of silently disabling validation on wrong decorator order
+- Log response-validation 500s with `exc_info`
+
+#### Internal
+
+- Pin `azure-functions>=1.17` and drop the optional-import rule
+- Adopt the canonical `copy_identity_attrs` helper (#231, #232)
+
+
+### v0.7.0 – v0.7.7 (2026-04-07 → 2026-07-18)
+
+#### Features
+
+- Expose `ValidationMetadata` and `get_validation_metadata` for the OpenAPI bridge (#143, #153)
+- Write convention-based `_azure_functions_toolkit_metadata` for cross-repo toolkit interop (#157)
+- Add automatic GitHub Release creation on tag push (#112)
+
+#### Fixed
+
+- Handle `FunctionBuilder` from the azure-functions SDK in `validate_http` (#173)
+- Correct invalid-JSON status code (422 → 400) (#137)
+- Handle custom error-formatter exceptions safely (#119)
+- Isolate wrapper `__dict__` from the handler to prevent metadata leak
+
+#### Internal
+
+- Decouple the adapter contract and harden worker-compat (#210, #224)
+- Raise coverage to 95%+ and enforce it via AGENTS.md and `pyproject.toml`
+- Pin external actions to commit SHAs and document the policy (#204)
+
 
 ### v0.6.0 (2026-03-29)
 
