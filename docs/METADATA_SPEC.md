@@ -23,7 +23,7 @@ write it; the consumer (`azure-functions-openapi`) reads it and derives the
 OpenAPI spec directly, instead of reconstructing OpenAPI shapes per producer.
 
 The JSON Schema in
-[`src/azure_functions_validation/schemas/endpoint.schema.json`](../src/azure_functions_validation/schemas/endpoint.schema.json)
+[`src/azure_functions_validation/schemas/endpoint.schema.json`](https://github.com/yeongseon/azure-functions-validation-python/blob/main/src/azure_functions_validation/schemas/endpoint.schema.json)
 is an **internal conformance artifact of `azure-functions-validation`**: this
 package validates its own emitted payload against it in tests. It is not
 published, dereferenced, or shared as a runtime contract — each package owns
