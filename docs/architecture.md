@@ -153,9 +153,13 @@ Exported symbols (via `__all__`):
 - `ResponseValidationError` — exception type for response model validation failures
 - `SerializationError` — exception type for response serialization failures
 - `ErrorFormatter` — type alias for custom error formatting callables
+- `HttpError` — raise from a handler to return a controlled error envelope
+- `ValidationAdapter` — the adapter protocol (public extension point)
+- `PydanticAdapter` — the default Pydantic v2 adapter implementation
 - `__version__` — package version string
 
-Everything else (`PipelineConfig`, `PydanticAdapter`, `ValidationAdapter` protocol, internal pipeline functions) is not part of the top-level public API.
+Everything else (`PipelineConfig`, internal pipeline functions) is not part of
+the top-level public API.
 
 ## Key Design Decisions
 

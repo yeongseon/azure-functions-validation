@@ -99,7 +99,12 @@ def inspect(req: func.HttpRequest, headers: HeadersModel) -> dict[str, str]:
     return {"request_id": headers.x_request_id}
 ```
 
-### `request_model`
+### `request_model` (deprecated)
+
+!!! warning "Deprecated — use `body`"
+    `request_model` is a deprecated alias for `body` and emits a
+    `DeprecationWarning`. Prefer `body=` (which injects a parameter named
+    `body`). `request_model` will be removed in a future release.
 
 `request_model` is shorthand for body validation and injects a parameter named
 `req_model`.
@@ -109,9 +114,16 @@ class RequestModel(BaseModel):
     text: str
 
 
+# Deprecated form (emits DeprecationWarning):
 @validate_http(request_model=RequestModel)
 def post(req: func.HttpRequest, req_model: RequestModel) -> dict[str, str]:
     return {"text": req_model.text}
+
+
+# Preferred form:
+@validate_http(body=RequestModel)
+def post_preferred(req: func.HttpRequest, body: RequestModel) -> dict[str, str]:
+    return {"text": body.text}
 ```
 
 !!! warning "Mutual exclusivity"

@@ -133,9 +133,9 @@ def get_task(req: func.HttpRequest, path: TaskPath) -> dict[str, object]:
 
 @app.function_name(name="create_task")
 @app.route(route="tasks", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-@validate_http(request_model=TaskCreateRequest, response_model=TaskResponse)
-def create_task(req: func.HttpRequest, req_model: TaskCreateRequest) -> TaskResponse:
-    """Create a new task using the request_model shorthand.
+@validate_http(body=TaskCreateRequest, response_model=TaskResponse)
+def create_task(req: func.HttpRequest, body: TaskCreateRequest) -> TaskResponse:
+    """Create a new task using body validation.
 
     POST /api/tasks  {"title": "New task", "priority": 2}
     """
@@ -143,9 +143,9 @@ def create_task(req: func.HttpRequest, req_model: TaskCreateRequest) -> TaskResp
 
     task = TaskResponse(
         id=_NEXT_ID,
-        title=req_model.title,
-        description=req_model.description,
-        priority=req_model.priority,
+        title=body.title,
+        description=body.description,
+        priority=body.priority,
         done=False,
     )
     _TASKS[_NEXT_ID] = task.model_dump()

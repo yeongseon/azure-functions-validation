@@ -163,7 +163,12 @@ def search(
     Use combined validation when each source has distinct semantics:
     body for domain payload, query for paging/filtering, headers for metadata.
 
-## `request_model` shorthand
+## `request_model` shorthand (deprecated)
+
+!!! warning "Deprecated — use `body`"
+    `request_model` is a deprecated alias for `body` and emits a
+    `DeprecationWarning`. Prefer `body=` (which injects a parameter named
+    `body`). `request_model` will be removed in a future release.
 
 `request_model` is shorthand for body validation and injects `req_model`.
 
@@ -172,9 +177,10 @@ class CreateTaskBody(BaseModel):
     title: str
 
 
-@validate_http(request_model=CreateTaskBody)
-def create_task(req: func.HttpRequest, req_model: CreateTaskBody) -> dict[str, str]:
-    return {"title": req_model.title}
+# Preferred:
+@validate_http(body=CreateTaskBody)
+def create_task(req: func.HttpRequest, body: CreateTaskBody) -> dict[str, str]:
+    return {"title": body.title}
 ```
 
 !!! warning "Non-combinable shorthand"
