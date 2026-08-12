@@ -77,7 +77,7 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
 - `query`: query string validation.
 - `path`: route parameter validation.
 - `headers`: header validation.
-- `request_model`: shorthand alias for body validation.
+- `request_model`: **deprecated** alias for `body` (emits `DeprecationWarning`; use `body=`).
 
 ### Response validation
 
@@ -85,9 +85,10 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
 - Invalid response payloads return a `500` with a safe validation envelope.
 - Returning `func.HttpResponse` bypasses model validation intentionally.
 
-!!! warning "Use `request_model` carefully"
-    `request_model` cannot be combined with `body`, `query`, `path`, or `headers`.
-    Use explicit `body=...` when validating multiple input sources.
+!!! warning "`request_model` is deprecated"
+    `request_model` is a deprecated alias for `body` and emits a
+    `DeprecationWarning`. Use explicit `body=...` instead. It cannot be
+    combined with `body`, `query`, `path`, or `headers`.
 
 ## Where to go next
 

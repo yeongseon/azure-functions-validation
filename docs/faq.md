@@ -73,18 +73,18 @@ Typical approach for file uploads:
 
 ## What is the difference between `body` and `request_model`?
 
-- `body=Model`: validates request body and injects `body` parameter.
-- `request_model=Model`: shorthand alias for body validation and injects
-  `req_model` parameter.
-
-They are functionally similar for single-source body validation.
+- `body=Model`: validates request body and injects `body` parameter. **Preferred.**
+- `request_model=Model`: **deprecated** alias for `body` that injects a
+  `req_model` parameter and emits a `DeprecationWarning`. Use `body=` instead.
 
 ```python
+# Preferred:
 @validate_http(body=CreateBody)
 def a(req: func.HttpRequest, body: CreateBody) -> dict[str, str]:
     return {"name": body.name}
 
 
+# Deprecated (emits DeprecationWarning):
 @validate_http(request_model=CreateBody)
 def b(req: func.HttpRequest, req_model: CreateBody) -> dict[str, str]:
     return {"name": req_model.name}

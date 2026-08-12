@@ -28,7 +28,7 @@ request and response contracts.
 | --- | --- | --- |
 | `GET` | `/api/tasks` | List tasks with optional query filters |
 | `GET` | `/api/tasks/{task_id}` | Get one task by id |
-| `POST` | `/api/tasks` | Create task with `request_model` shorthand |
+| `POST` | `/api/tasks` | Create task with `body` validation |
 | `PATCH` | `/api/tasks/{task_id}` | Partial update with body + path validation |
 | `DELETE` | `/api/tasks/{task_id}` | Delete task and return `204 No Content` |
 
@@ -114,15 +114,15 @@ def get_task(req: func.HttpRequest, path: TaskPath) -> dict[str, object]:
 
 @app.function_name(name="create_task")
 @app.route(route="tasks", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-@validate_http(request_model=TaskCreateRequest, response_model=TaskResponse)
-def create_task(req: func.HttpRequest, req_model: TaskCreateRequest) -> TaskResponse:
+@validate_http(body=TaskCreateRequest, response_model=TaskResponse)
+def create_task(req: func.HttpRequest, body: TaskCreateRequest) -> TaskResponse:
     global _NEXT_ID  # noqa: PLW0603
 
     task = TaskResponse(
         id=_NEXT_ID,
-        title=req_model.title,
-        description=req_model.description,
-        priority=req_model.priority,
+        title=body.title,
+        description=body.description,
+        priority=body.priority,
         done=False,
     )
     _TASKS[_NEXT_ID] = task.model_dump()
@@ -176,9 +176,9 @@ def delete_task(req: func.HttpRequest, path: TaskPath) -> func.HttpResponse:
 
 This catches accidental response drift early.
 
-### Step 3: implement create with `request_model`
+### Step 3: implement create with `body`
 
-`request_model=TaskCreateRequest` is concise and injects `req_model`.
+`body=TaskCreateRequest` validates the request body and injects `body`.
 
 ### Step 4: implement PATCH safely
 

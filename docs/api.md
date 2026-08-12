@@ -5,16 +5,20 @@ This page documents the public API exported from `azure_functions_validation`.
 ```python
 from azure_functions_validation import (
     ErrorFormatter,
+    HttpError,
+    PydanticAdapter,
     ResponseValidationError,
     SerializationError,
+    ValidationAdapter,
     validate_http,
 )
 ```
 
 !!! note "Public surface"
-    The package exports: `validate_http`, `ResponseValidationError`,
-    `ErrorFormatter`, and `SerializationError`. Pipeline and adapter internals
-    are not public contracts.
+    The package exports (`__all__`): `validate_http`, `ResponseValidationError`,
+    `SerializationError`, `ErrorFormatter`, `ValidationAdapter`, `PydanticAdapter`,
+    and `HttpError`. Pipeline internals (`PipelineConfig`, `run_pipeline`) are not
+    public contracts.
 
 ## `validate_http`
 
@@ -137,7 +141,13 @@ def get_user(
     }
 ```
 
-### Usage example: custom `request_model` shorthand
+### Usage example: `request_model` shorthand (deprecated)
+
+!!! warning "Deprecated"
+    `request_model` is a deprecated alias for `body` and emits a
+    `DeprecationWarning`. Use `body=` instead; it injects a parameter named
+    `body` (rather than `req_model`). `request_model` will be removed in a
+    future release. See the migration below.
 
 ```python
 import azure.functions as func
@@ -155,10 +165,14 @@ app = func.FunctionApp()
 
 @app.function_name(name="create_task")
 @app.route(route="tasks", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-@validate_http(request_model=CreateTaskRequest)
-def create_task(req: func.HttpRequest, req_model: CreateTaskRequest) -> dict[str, str]:
-    return {"title": req_model.title}
+@validate_http(body=CreateTaskRequest)
+def create_task(req: func.HttpRequest, body: CreateTaskRequest) -> dict[str, str]:
+    return {"title": body.title}
 ```
+
+!!! note "Migrating from `request_model`"
+    Replace `@validate_http(request_model=Model)` (injects `req_model`) with
+    `@validate_http(body=Model)` (injects `body`).
 
 !!! warning "Conflict rule"
     `request_model` cannot be combined with `body`, `query`, `path`, or `headers`.
@@ -314,16 +328,6 @@ misparsing new fields.
 - A **custom** `ErrorFormatter` owns its output shape entirely: the marker is
   never injected into a successful custom formatter's response. Emit your own
   version field there if you need one.
-{
-  "detail": [
-    {
-      "loc": ["body", "field_name"],
-      "msg": "Field required",
-      "type": "missing"
-    }
-  ]
-}
-```
 
 Common status codes:
 
@@ -343,14 +347,29 @@ Common status codes:
     added to disambiguate same-named fields across inputs. To keep the previous
     unprefixed `loc` for one migration cycle, pass `legacy_loc=True` to
     `validate_http`. This escape hatch will be removed in a future release.
-    - response errors: `loc` equals `["response"]`
+
+## Custom adapters
+
+`ValidationAdapter` (the adapter protocol) and `PydanticAdapter` (the default
+implementation) are part of the public API. Pass a custom `adapter=` to
+`validate_http` to plug in a non-Pydantic validation backend; most deployments
+should keep the default `PydanticAdapter`.
+
+```python
+from azure_functions_validation import PydanticAdapter, ValidationAdapter, validate_http
+
+adapter: ValidationAdapter = PydanticAdapter(legacy_loc=False)
+
+
+@validate_http(body=RequestModel, adapter=adapter)
+def handler(req, body): ...
+```
 
 ## Internal references
 
 These modules are useful for advanced extension work but are internal APIs:
 
 - `pipeline.py`: `PipelineConfig`, `run_pipeline`, `run_pipeline_async`
-- `adapter.py`: `ValidationAdapter`, `PydanticAdapter`
 
 For full implementation patterns, see [Usage](usage.md) and
 [Architecture](architecture.md).

@@ -335,7 +335,7 @@ class TestCrudGetTask:
 
 
 class TestCrudCreateTask:
-    """POST /api/tasks — create via request_model shorthand."""
+    """POST /api/tasks — create via body validation."""
 
     def setup_method(self) -> None:
         self.mod = _crud_module()
