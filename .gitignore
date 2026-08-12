@@ -33,3 +33,6 @@ examples/e2e_app/.python_packages/
 
 # Review
 .venv-review/
+
+# Sisyphus/OMC internal orchestration state
+.sisyphus/
