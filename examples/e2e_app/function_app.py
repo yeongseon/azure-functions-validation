@@ -1,9 +1,11 @@
 """E2E test function app for azure-functions-validation."""
+
 import json
 import logging
 
-from pydantic import BaseModel, Field
 import azure.functions as func
+from pydantic import BaseModel, Field
+
 from azure_functions_validation import validate_http
 
 app = func.FunctionApp()

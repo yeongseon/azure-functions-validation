@@ -47,4 +47,3 @@ def get_profile(
         view=view,
         request_id=headers.x_request_id,
     )
-
