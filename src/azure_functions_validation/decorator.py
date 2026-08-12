@@ -77,15 +77,13 @@ def validate_http(
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         if _is_function_builder(func):
-            warnings.warn(
+            raise RuntimeError(
                 "@validate_http received an Azure Functions FunctionBuilder instead of "
-                "your handler, which means it was applied ABOVE @app.route. Validation "
-                "is NOT active for this function. Place @validate_http BELOW @app.route "
-                "so it wraps the handler directly.",
-                RuntimeWarning,
-                stacklevel=2,
+                "your handler, which means it was applied ABOVE a binding decorator "
+                "(e.g. @app.route). Validation is NOT active in this order and no "
+                "endpoint metadata is emitted. Place @validate_http BELOW the binding "
+                "decorator (innermost) so it wraps the handler directly."
             )
-            return func
 
         # Cross-repo decorator-order guard (azure-functions-logging#310).
         if _has_logging_metadata(func):

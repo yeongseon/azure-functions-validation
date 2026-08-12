@@ -206,9 +206,9 @@ class TestCopyIdentityAttrs:
 
 
 class TestWrongDecoratorOrder:
-    """@validate_http applied above @app.route must warn, not silently no-op."""
+    """@validate_http applied above @app.route must raise, not silently no-op."""
 
-    def test_real_sdk_function_builder_warns_and_returns_unwrapped(self) -> None:
+    def test_real_sdk_function_builder_raises_and_does_not_wrap(self) -> None:
         """A genuine SDK ``FunctionBuilder`` (from ``@app.route``) must be detected.
 
         Uses the real ``azure.functions`` SDK so this test fails automatically if a
@@ -227,20 +227,18 @@ class TestWrongDecoratorOrder:
         builder = app.route(route="users", methods=["POST"])(handler)
         assert isinstance(builder, FunctionBuilder)
 
-        with pytest.warns(RuntimeWarning, match=r"@app\.route"):
-            result = validate_http(body=UserModel)(builder)
-        assert result is builder
+        with pytest.raises(RuntimeError, match=r"@app\.route"):
+            validate_http(body=UserModel)(builder)
 
-    def test_function_builder_by_type_name_fallback_warns(self) -> None:
+    def test_function_builder_by_type_name_fallback_raises(self) -> None:
         """SDK builds without the method are still caught by the type-name fallback."""
 
         class FunctionBuilder:  # name is the fallback signal
             pass
 
         builder = FunctionBuilder()
-        with pytest.warns(RuntimeWarning, match="FunctionBuilder"):
-            result = validate_http(body=UserModel)(builder)
-        assert result is builder
+        with pytest.raises(RuntimeError, match="FunctionBuilder"):
+            validate_http(body=UserModel)(builder)
 
     def test_normal_handler_is_not_flagged(self, recwarn: pytest.WarningsRecorder) -> None:
         """A normal handler must wrap without emitting the wrong-order warning."""
