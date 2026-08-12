@@ -91,13 +91,14 @@ When splitting a large piece of work into focused issues, keep the umbrella open
 ### Flow
 1. `make release-patch` (or `-minor` / `-major`) on `main`
 2. This runs: `hatch version` → `git commit` → `make changelog` → `git commit` → `git tag` → `git push`
-3. Tag push triggers **Publish to PyPI** GitHub Actions workflow automatically.
+3. Tag push triggers the **Publish to PyPI** GitHub Actions workflow. **Verification is a pre-publish gate, not a post-publish check.** The workflow runs `build → lib-tests → cookbook-smoke → publish`; the `publish` job only runs after the candidate wheel passes the library test suite AND the downstream cookbook smoke tests, and it uploads the exact artifact that was tested (it never rebuilds). A 0.21.0-class regression therefore cannot reach PyPI — a failed gate leaves the version unpublished.
 4. Update `docs/changelog.md` separately if needed (different format from `CHANGELOG.md`).
-5. **Verify the release against the dogfood cookbook.** Once **Publish to PyPI** succeeds, confirm the downstream consumer still passes on the freshly published version:
-   - In [`azure-functions-cookbook-python`](https://github.com/yeongseon/azure-functions-cookbook-python), upgrade to the new release (`hatch run pip install -U "azure-functions-validation>=X.Y,<1"`) and run `make test`.
-   - Treat any new `RuntimeWarning`/`DeprecationWarning` from `@validate_http` as a release-blocking signal — the library surfaces decorator-order and API-drift problems as warnings, so a clean run (zero validation warnings) is part of the release gate.
-   - If the cookbook pins a lower bound (`azure-functions-validation>=X.Y,<1`), bump it to the new minor in the same verification PR so examples are tested against the version they advertise.
-   - A release is **not** considered done until the cookbook passes on the published version.
+5. **Failed-gate recovery (stuck tag).** A git tag is immutable and may already have been consumed, so if the gate fails do **not** move or reuse the tag. Fix forward on `main` and cut the next patch tag (`make release-patch`). The unpublished version number is simply skipped.
+6. **Local pre-tag dry run (recommended before releasing).** Reproduce the automated gate locally before pushing the tag so failures surface before a version is burned:
+   - Build the candidate: `make build` (produces `dist/*.whl`).
+   - In [`azure-functions-cookbook-python`](https://github.com/yeongseon/azure-functions-cookbook-python): `make install`, then install the candidate over the PyPI floor with `hatch run pip install --force-reinstall --no-deps <path-to-candidate-wheel>`, confirm `importlib.metadata.version("azure-functions-validation")` equals the tag, and run `hatch run smoke`.
+   - Treat any new `RuntimeWarning`/`DeprecationWarning` from `@validate_http` as release-blocking — the library surfaces decorator-order and API-drift problems as warnings, so a clean run (zero validation warnings) is part of the gate.
+   - If the cookbook pins a lower bound (`azure-functions-validation>=X.Y,<1`), bump it to the new minor in the same release PR so examples are tested against the version they advertise.
 
 ## Golden Commands
 

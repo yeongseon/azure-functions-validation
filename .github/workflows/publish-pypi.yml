@@ -14,13 +14,19 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
+# Verify-before-publish gate (see docs/RELEASE.md / AGENTS.md):
+#   build -> lib-tests -> cookbook-smoke (against the built wheel) -> publish
+# The publish job uploads the EXACT artifact that was tested; it never rebuilds.
+# A tag whose gate fails is a failed release candidate: the version stays
+# unpublished. Recover by fixing forward and cutting the next patch tag
+# (never move a tag that may already have been consumed).
 jobs:
-  build-and-publish:
+  build:
+    name: Build & verify version
     runs-on: ubuntu-latest
-    environment: pypi
-
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
@@ -38,6 +44,7 @@ jobs:
           pip install build
 
       - name: Check if tag matches __version__
+        id: version
         run: |
           TAG_NAME="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
           VERSION_FROM_FILE=$(grep -Po '(?<=__version__ = ")[^"]*' src/azure_functions_validation/__init__.py)
@@ -49,9 +56,100 @@ jobs:
             echo "::error ::Version in __init__.py ($VERSION_FROM_FILE) does not match git tag ($TAG_VERSION)"
             exit 1
           fi
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build distribution packages
         run: python -m build
+
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 5
+
+  lib-tests:
+    name: Library tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install Hatch
+        run: pip install hatch
+
+      - name: Run test suite
+        run: hatch run test
+
+  cookbook-smoke:
+    name: Cookbook dogfood smoke (candidate wheel)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout cookbook (downstream consumer)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          repository: yeongseon/azure-functions-cookbook-python
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.10"
+
+      - name: Download candidate wheel
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: candidate-dist
+
+      - name: Install cookbook environment
+        run: |
+          pip install hatch
+          make install
+
+      - name: Install candidate wheel over the PyPI floor
+        run: |
+          WHEEL=$(ls candidate-dist/*.whl | head -n1)
+          echo "Installing candidate wheel: $WHEEL"
+          hatch run pip install --force-reinstall --no-deps "$WHEEL"
+
+      - name: Verify candidate version is under test
+        run: |
+          EXPECTED="${{ needs.build.outputs.version }}"
+          ACTUAL=$(hatch run python -c "import importlib.metadata as m; print(m.version('azure-functions-validation'))")
+          echo "Expected candidate version: $EXPECTED"
+          echo "Installed version:          $ACTUAL"
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error ::Cookbook is not exercising the candidate wheel ($ACTUAL != $EXPECTED)"
+            exit 1
+          fi
+
+      - name: Run cookbook smoke tests against candidate
+        run: hatch run smoke
+
+  publish:
+    name: Publish to PyPI
+    needs: [build, lib-tests, cookbook-smoke]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download tested distribution artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -36,3 +36,6 @@ examples/e2e_app/.python_packages/
 
 # Sisyphus/OMC internal orchestration state
 .sisyphus/
+.omc/
+.claude/
+*.agent-session.json
