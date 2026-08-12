@@ -290,7 +290,6 @@ class TestLoggingDecoratorOrder:
             wrapped = validate_http(body=UserModel)(inner)
         assert wrapped is not inner
 
-
     def test_warns_preserves_logging_namespace(self) -> None:
         """The wrapper keeps the pre-existing ``logging`` namespace (merge, no clobber)."""
         from azure_functions_validation._metadata import METADATA_ATTR
@@ -305,9 +304,7 @@ class TestLoggingDecoratorOrder:
         assert "logging" in meta
         assert "validation" in meta
 
-    def test_no_warning_for_correct_order(
-        self, recwarn: pytest.WarningsRecorder
-    ) -> None:
+    def test_no_warning_for_correct_order(self, recwarn: pytest.WarningsRecorder) -> None:
         """Correct order: @validate_http runs first, sees no ``logging`` namespace."""
 
         def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
@@ -317,9 +314,7 @@ class TestLoggingDecoratorOrder:
         assert wrapped is not handler
         assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)
 
-    def test_no_warning_for_unrelated_namespace(
-        self, recwarn: pytest.WarningsRecorder
-    ) -> None:
+    def test_no_warning_for_unrelated_namespace(self, recwarn: pytest.WarningsRecorder) -> None:
         """A non-logging namespace (e.g. another sibling) must not trigger the warning."""
         from azure_functions_validation._metadata import METADATA_ATTR
 
@@ -330,7 +325,6 @@ class TestLoggingDecoratorOrder:
         wrapped = validate_http(body=UserModel)(handler)
         assert wrapped is not handler
         assert not any(issubclass(w.category, RuntimeWarning) for w in recwarn.list)
-
 
 
 # ---------------------------------------------------------------------------
@@ -387,9 +381,7 @@ class TestReqContextWorkerIndexing:
         seen: dict[str, object] = {}
 
         @validate_http(query=QueryModel)
-        async def handler(
-            req: HttpRequest, context: object, query: QueryModel
-        ) -> HttpResponse:
+        async def handler(req: HttpRequest, context: object, query: QueryModel) -> HttpResponse:
             seen["context"] = context
             return HttpResponse("ok")
 
@@ -402,3 +394,128 @@ class TestReqContextWorkerIndexing:
 
         assert response.status_code == 200
         assert seen["context"] is sentinel
+
+
+# ---------------------------------------------------------------------------
+# Passthrough binding params: extra input/output bindings (issue #297)
+# ---------------------------------------------------------------------------
+
+
+class TestPassthroughBindingParams:
+    """Lock worker-compat behaviour for handlers that also declare an extra
+    input/output binding param alongside ``req`` (issue #297).
+
+    ``@validate_http`` must EXPOSE such binding params (e.g. a durable
+    ``client`` input or a ``func.Out[...]`` output) in the worker-visible
+    signature so the SDK can bind them by name, while still HIDING the
+    validation-injected params (``body``/``query``/...). Passthrough params must
+    also be forwarded to the raw handler at call time.
+    """
+
+    def test_output_binding_param_is_exposed_and_annotated(self) -> None:
+        import inspect
+
+        import azure.functions as func
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel, order_doc: func.Out[str]) -> HttpResponse:
+            return HttpResponse("ok")
+
+        # req + passthrough output binding exposed; validation-injected body hidden.
+        assert list(inspect.signature(handler).parameters) == ["req", "order_doc"]
+        # Resolved (not string) annotation so the worker can validate func.Out[...].
+        assert handler.__annotations__ == {"order_doc": func.Out[str]}
+        assert not hasattr(handler, "__wrapped__")
+
+    def test_input_binding_param_is_exposed_and_forwarded(self) -> None:
+        import inspect
+
+        from azure_functions_validation.testing import MockHttpRequest
+
+        seen: dict[str, object] = {}
+
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, client: object, body: UserModel) -> HttpResponse:
+            seen["client"] = client
+            seen["body"] = body
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req", "client"]
+
+        sentinel = object()
+        response = handler(MockHttpRequest(json={"name": "Alice", "age": 30}), client=sentinel)
+
+        assert response.status_code == 200
+        assert seen["client"] is sentinel
+        assert isinstance(seen["body"], UserModel)
+
+    @pytest.mark.anyio
+    async def test_async_output_binding_exposed_and_forwarded(self) -> None:
+        import inspect
+
+        import azure.functions as func
+
+        from azure_functions_validation.testing import MockHttpRequest
+
+        seen: dict[str, object] = {}
+
+        @validate_http(body=UserModel)
+        async def handler(
+            req: HttpRequest, order_doc: func.Out[str], body: UserModel
+        ) -> HttpResponse:
+            seen["order_doc"] = order_doc
+            seen["body"] = body
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req", "order_doc"]
+
+        out = _RecordingOut()
+        response = await handler(MockHttpRequest(json={"name": "Bob", "age": 22}), order_doc=out)
+
+        assert response.status_code == 200
+        assert seen["order_doc"] is out
+        assert isinstance(seen["body"], UserModel)
+
+    def test_context_stays_hidden_alongside_binding(self) -> None:
+        import inspect
+
+        import azure.functions as func
+
+        # ``context`` is worker-injected implicitly and must stay hidden (#284),
+        # while ``order_doc`` is a registered binding and must be exposed (#297).
+        @validate_http(query=QueryModel)
+        def handler(
+            req: HttpRequest,
+            context: object,
+            order_doc: func.Out[str],
+            query: QueryModel,
+        ) -> HttpResponse:
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req", "order_doc"]
+        assert "context" not in handler.__annotations__
+
+    def test_no_extra_binding_regression(self) -> None:
+        import inspect
+
+        # Plain handler: exposed signature stays a single ``req`` with no
+        # annotations, exactly as before (regression guard).
+        @validate_http(body=UserModel)
+        def handler(req: HttpRequest, body: UserModel) -> HttpResponse:
+            return HttpResponse("ok")
+
+        assert list(inspect.signature(handler).parameters) == ["req"]
+        assert handler.__annotations__ == {}
+
+
+class _RecordingOut:
+    """Minimal ``func.Out``-like stub for exercising output-binding forwarding."""
+
+    def __init__(self) -> None:
+        self._value: object = None
+
+    def set(self, value: object) -> None:
+        self._value = value
+
+    def get(self) -> object:
+        return self._value
