@@ -16,7 +16,16 @@ permissions:
   contents: read
 
 # Verify-before-publish gate (see docs/RELEASE.md / AGENTS.md):
-#   build -> lib-tests -> cookbook-smoke (against the built wheel) -> publish
+#   build -> lib-tests -> cookbook-smoke -> cookbook-local-e2e
+#         -> verify-azure-certification -> publish
+# Tiered runtime verification before any PyPI upload:
+#   * lib-tests            : the library's own unit suite (against the built wheel).
+#   * cookbook-smoke       : downstream module-import checks (catches registration/import drift).
+#   * cookbook-local-e2e   : real func host + Azurite, live HTTP invocation of the candidate
+#                            (catches 'imports fine but runtime breaks' regressions, no cloud).
+#   * verify-azure-certification : requires the EXACT release commit to have passed a real-Azure
+#                            deploy+live-e2e certification (e2e-azure.yml) that is fresh and
+#                            version/SHA-matched. Real Azure is certified per release, not per publish.
 # The publish job uploads the EXACT artifact that was tested; it never rebuilds.
 # A tag whose gate fails is a failed release candidate: the version stays
 # unpublished. Recover by fixing forward and cutting the next patch tag
@@ -137,9 +146,149 @@ jobs:
       - name: Run cookbook smoke tests against candidate
         run: hatch run smoke
 
+  cookbook-local-e2e:
+    name: Cookbook local runtime e2e (func + Azurite, candidate wheel)
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      # Pin Core Tools; bump only after a verified run. npm is Microsoft's
+      # documented v4 install path (see e2e-azure.yml for rationale).
+      FUNCTIONS_CORE_TOOLS_VERSION: "4.12.0"
+    steps:
+      - name: Checkout cookbook (downstream consumer)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          repository: yeongseon/azure-functions-cookbook-python
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.10"
+
+      - name: Set up Node.js (func Core Tools + Azurite)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install Azure Functions Core Tools + Azurite
+        run: |
+          npm install -g "azure-functions-core-tools@${FUNCTIONS_CORE_TOOLS_VERSION}" azurite
+          func --version
+          azurite --version
+
+      - name: Download candidate wheel
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: dist
+          path: candidate-dist
+
+      - name: Install cookbook environment
+        run: |
+          pip install hatch
+          make install
+
+      - name: Install candidate wheel over the PyPI floor
+        run: |
+          WHEEL=$(ls candidate-dist/*.whl | head -n1)
+          echo "Installing candidate wheel: $WHEEL"
+          hatch run pip install --force-reinstall --no-deps "$WHEEL"
+
+      - name: Verify candidate version is under test
+        run: |
+          EXPECTED="${{ needs.build.outputs.version }}"
+          ACTUAL=$(hatch run python -c "import importlib.metadata as m; print(m.version('azure-functions-validation'))")
+          echo "Expected candidate version: $EXPECTED"
+          echo "Installed version:          $ACTUAL"
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error ::Cookbook is not exercising the candidate wheel ($ACTUAL != $EXPECTED)"
+            exit 1
+          fi
+
+      - name: Run cookbook HTTP e2e against candidate (real func host)
+        run: hatch run e2e tests/e2e/test_http_examples.py
+        timeout-minutes: 15
+
+  verify-azure-certification:
+    name: Verify Azure release certification
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Resolve release commit
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Locate successful Azure certification for this commit
+        id: cert
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT: ${{ steps.commit.outputs.sha }}
+        run: |
+          # A release may only publish if the EXACT commit was certified against
+          # real Azure by the trusted certification workflow (see e2e-azure.yml).
+          RUN_ID=$(gh run list \
+            --workflow e2e-azure.yml \
+            --json databaseId,headSha,conclusion \
+            --limit 50 \
+            --jq "[.[] | select(.headSha==\"$COMMIT\" and .conclusion==\"success\")] | first | .databaseId")
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+            echo "::error ::No successful Azure certification run found for commit $COMMIT. Dispatch the 'Azure Release Certification' (e2e-azure.yml) workflow on this release commit before publishing."
+            exit 1
+          fi
+          echo "Found certification run: $RUN_ID"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Download certification record
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: azure-cert
+          path: cert
+          run-id: ${{ steps.cert.outputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Assert certification matches this release
+        env:
+          COMMIT: ${{ steps.commit.outputs.sha }}
+          VERSION: ${{ needs.build.outputs.version }}
+          FRESHNESS_DAYS: "14"
+        run: |
+          python3 - "$COMMIT" "$VERSION" "$FRESHNESS_DAYS" <<'PY'
+          import json, sys, datetime, pathlib
+          commit, version, fresh_days = sys.argv[1], sys.argv[2], int(sys.argv[3])
+          cert = json.loads(pathlib.Path("cert/certification.json").read_text())
+          def fail(m):
+              print(f"::error ::{m}")
+              sys.exit(1)
+          if cert.get("result") != "success":
+              fail("certification result is not success")
+          if cert.get("package") != "azure-functions-validation":
+              fail(f"cert package {cert.get('package')} != azure-functions-validation")
+          if cert.get("commit") != commit:
+              fail(f"cert commit {cert.get('commit')} != release commit {commit}")
+          if cert.get("version") != version:
+              fail(f"cert version {cert.get('version')} != release version {version}")
+          ts = cert.get("certified_at")
+          if not ts:
+              fail("cert missing certified_at")
+          certified = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+          age = datetime.datetime.now(datetime.timezone.utc) - certified
+          if age > datetime.timedelta(days=fresh_days):
+              fail(f"certification is stale: {age.days}d > {fresh_days}d")
+          print(f"Azure certification verified: {version}@{commit[:12]} certified {age.days}d ago")
+          PY
+
   publish:
     name: Publish to PyPI
-    needs: [build, lib-tests, cookbook-smoke]
+    needs: [build, lib-tests, cookbook-smoke, cookbook-local-e2e, verify-azure-certification]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
