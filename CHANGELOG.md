@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.11.1] - 2026-08-12
+
+### ⚙️ Miscellaneous Tasks
+
+- Stop tracking .sisyphus orchestration artifacts 
+
+### 🐛 Bug Fixes
+
+- *(decorator)* Raise RuntimeError when @validate_http wraps a FunctionBuilder (#299) 
+
+### 💼 Other
+
+- Bump version to 0.11.1 
 ## [0.11.0] - 2026-08-12
 
 ### 💼 Other
@@ -9,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Update changelog 
 - Add Branch Hygiene section to AGENTS.md 
 
 ### 🚀 Features
