@@ -88,17 +88,34 @@ When splitting a large piece of work into focused issues, keep the umbrella open
 - `make release VERSION=x.y.z` — set explicit version, update changelog, tag, and push
 - `make tag-release VERSION=x.y.z` — create and push an annotated tag (used internally by release targets)
 
+### Tiered runtime verification (what gates a release)
+
+Release verification is layered; each tier catches a different failure class, and **every tier is a pre-publish gate** (not a post-publish check):
+
+| Tier | Runs where | Catches |
+| --- | --- | --- |
+| `lib-tests` | publish-pypi.yml (per publish) | library unit regressions |
+| `cookbook-smoke` | publish-pypi.yml (per publish) | downstream import/registration drift (0.21.0 class) |
+| `cookbook-local-e2e` | publish-pypi.yml (per publish) | "imports fine but runtime breaks" — real `func` host + Azurite, live HTTP invocation of the candidate wheel, no cloud |
+| `verify-azure-certification` | publish-pypi.yml (per publish) | requires a fresh, SHA+version-matched **real-Azure** certification for the exact release commit |
+| Azure Release Certification (`e2e-azure.yml`) | `workflow_dispatch`, per release | cloud-only drift — deploys to real Azure, runs live e2e, records a certification artifact. **Certified per release, not per publish** (it no longer triggers on tag, which used to race the publish and could not gate it). |
+
 ### Flow
 1. `make release-patch` (or `-minor` / `-major`) on `main`
 2. This runs: `hatch version` → `git commit` → `make changelog` → `git commit` → `git tag` → `git push`
-3. Tag push triggers the **Publish to PyPI** GitHub Actions workflow. **Verification is a pre-publish gate, not a post-publish check.** The workflow runs `build → lib-tests → cookbook-smoke → publish`; the `publish` job only runs after the candidate wheel passes the library test suite AND the downstream cookbook smoke tests, and it uploads the exact artifact that was tested (it never rebuilds). A 0.21.0-class regression therefore cannot reach PyPI — a failed gate leaves the version unpublished.
+3. Tag push triggers the **Publish to PyPI** GitHub Actions workflow. **Verification is a pre-publish gate, not a post-publish check.** The `publish` job runs only after `build → lib-tests → cookbook-smoke → cookbook-local-e2e → verify-azure-certification` all pass, and it uploads the exact artifact that was tested (it never rebuilds). Because `cookbook-local-e2e` exercises the candidate against a real Functions host and `verify-azure-certification` requires a matching real-Azure certification, a 0.21.0-class regression (import-clean but runtime-broken) cannot reach PyPI — a failed gate leaves the version unpublished.
 4. Update `docs/changelog.md` separately if needed (different format from `CHANGELOG.md`).
 5. **Failed-gate recovery (stuck tag).** A git tag is immutable and may already have been consumed, so if the gate fails do **not** move or reuse the tag. Fix forward on `main` and cut the next patch tag (`make release-patch`). The unpublished version number is simply skipped.
 6. **Local pre-tag dry run (recommended before releasing).** Reproduce the automated gate locally before pushing the tag so failures surface before a version is burned:
    - Build the candidate: `make build` (produces `dist/*.whl`).
    - In [`azure-functions-cookbook-python`](https://github.com/yeongseon/azure-functions-cookbook-python): `make install`, then install the candidate over the PyPI floor with `hatch run pip install --force-reinstall --no-deps <path-to-candidate-wheel>`, confirm `importlib.metadata.version("azure-functions-validation")` equals the tag, and run `hatch run smoke`.
+   - Reproduce the local func-host tier: in the cookbook, with the candidate wheel installed, run `hatch run e2e tests/e2e/test_http_examples.py` (starts a real `func` host + Azurite and invokes the HTTP examples that exercise `@validate_http`). This is the local stand-in for `cookbook-local-e2e` and must pass before tagging.
    - Treat any new `RuntimeWarning`/`DeprecationWarning` from `@validate_http` as release-blocking — the library surfaces decorator-order and API-drift problems as warnings, so a clean run (zero validation warnings) is part of the gate.
    - If the cookbook pins a lower bound (`azure-functions-validation>=X.Y,<1`), bump it to the new minor in the same release PR so examples are tested against the version they advertise.
+7. **Real-Azure certification (required once per release, before the final tag).** `cookbook-local-e2e` substitutes for Azure on every publish, but a release must still be certified against real Azure at least once. Before pushing the release tag, dispatch the **Azure Release Certification** workflow on the exact release commit and version:
+   - `gh workflow run e2e-azure.yml --ref main -f ref=<release-sha> -f version=<x.y.z>`
+   - The run deploys to real Azure, executes the live e2e suite, and uploads the `azure-cert` artifact (keyed by commit SHA + version).
+   - `verify-azure-certification` in `publish-pypi.yml` later requires a successful, SHA+version-matched, non-stale (<14 day) certification for the release commit; without it the publish gate fails and the version stays unpublished.
 
 ## Golden Commands
 
