@@ -1,6 +1,19 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.11.0] - 2026-08-12
+
+### 💼 Other
+
+- Bump version to 0.11.0 
+
+### 📚 Documentation
+
+- Add Branch Hygiene section to AGENTS.md 
+
+### 🚀 Features
+
+- *(decorator)* Let @validate_http compose with extra input/output bindings (#298) 
 ## [0.10.1] - 2026-08-11
 
 ### 💼 Other
@@ -9,6 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📚 Documentation
 
+- Update changelog 
 - *(metadata)* Use absolute URL for endpoint schema link to fix strict mkdocs build 
 - Backfill changelog history and require cookbook dogfood verification on release 
 ## [0.10.0] - 2026-08-11
