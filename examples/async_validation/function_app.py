@@ -26,4 +26,3 @@ async def async_validation(
 ) -> AsyncGreetingResponse:
     await asyncio.sleep(0)
     return AsyncGreetingResponse(message=f"Hello {body.name}")
-
