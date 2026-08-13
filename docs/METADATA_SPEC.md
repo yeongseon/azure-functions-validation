@@ -1,8 +1,16 @@
-# `endpoint` metadata namespace — SPEC
+# `endpoint` metadata convention — `azure-functions-validation` conformance
 
 Status: **v1** · Owner namespace: `endpoint` · Issue: [#271](https://github.com/yeongseon/azure-functions-validation-python/issues/271) · Umbrella: [#270](https://github.com/yeongseon/azure-functions-validation-python/issues/270)
 
-> **Localization:** This specification is an English-only technical document
+> **Canonical contract:** The neutral, canonical home for the `endpoint`
+> metadata contract is
+> [`azure-functions-python-dx` › `docs/endpoint-contract.md`](https://github.com/yeongseon/azure-functions-python-dx/blob/main/docs/endpoint-contract.md).
+> This document is **not** that source of truth — it is a **convention**, not a
+> centralized binding spec. What follows describes how `azure-functions-validation`
+> conforms to the shared convention: its own emitted payload, canonicalization
+> rules, and internal (non-published) conformance artifacts.
+
+> **Localization:** This document is an English-only technical document
 > (the JSON Schema it links to is an internal conformance artifact of this
 > package, not a source of truth other packages bind to).
 > It is intentionally **not** part of the translated README set
