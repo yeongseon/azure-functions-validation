@@ -16,13 +16,17 @@ permissions:
   contents: read
 
 # Verify-before-publish gate (see docs/RELEASE.md / AGENTS.md):
-#   build -> lib-tests -> cookbook-smoke -> cookbook-local-e2e
+#   build -> lib-tests -> cookbook-smoke -> cookbook-host-smoke
 #         -> verify-azure-certification -> publish
 # Tiered runtime verification before any PyPI upload:
 #   * lib-tests            : the library's own unit suite (against the built wheel).
 #   * cookbook-smoke       : downstream module-import checks (catches registration/import drift).
-#   * cookbook-local-e2e   : real func host + Azurite, live HTTP invocation of the candidate
-#                            (catches 'imports fine but runtime breaks' regressions, no cloud).
+#   * cookbook-host-smoke  : install the candidate wheel into the cookbook, then boot a real func
+#                            host + Azurite and run the cookbook HTTP e2e. This proves the candidate
+#                            installs cleanly and the Functions host starts with it present in the
+#                            environment. NOTE: the cookbook HTTP examples do not import this package,
+#                            so this tier is a host-boot smoke, NOT proof of this package's own runtime
+#                            behavior. Package-native runtime coverage is tracked separately.
 #   * verify-azure-certification : requires the EXACT release commit to have passed a real-Azure
 #                            deploy+live-e2e certification (e2e-azure.yml) that is fresh and
 #                            version/SHA-matched. Real Azure is certified per release, not per publish.
@@ -146,8 +150,8 @@ jobs:
       - name: Run cookbook smoke tests against candidate
         run: hatch run smoke
 
-  cookbook-local-e2e:
-    name: Cookbook local runtime e2e (func + Azurite, candidate wheel)
+  cookbook-host-smoke:
+    name: Cookbook host-boot smoke (func + Azurite, candidate wheel)
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -205,7 +209,7 @@ jobs:
             exit 1
           fi
 
-      - name: Run cookbook HTTP e2e against candidate (real func host)
+      - name: Boot cookbook func host with candidate wheel (host-smoke)
         run: hatch run e2e tests/e2e/test_http_examples.py
         timeout-minutes: 15
 
@@ -288,7 +292,7 @@ jobs:
 
   publish:
     name: Publish to PyPI
-    needs: [build, lib-tests, cookbook-smoke, cookbook-local-e2e, verify-azure-certification]
+    needs: [build, lib-tests, cookbook-smoke, cookbook-host-smoke, verify-azure-certification]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
