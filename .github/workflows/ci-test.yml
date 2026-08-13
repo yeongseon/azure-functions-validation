@@ -10,7 +10,83 @@ permissions:
   contents: read
 
 jobs:
+  # Classify the PR diff as docs-only or not. This gates the (expensive) test
+  # matrix for pull requests while the release gate (publish-pypi.yml) and the
+  # security workflows (codeql.yml / security.yml) are NEVER selectively skipped.
+  #
+  # docs_only is only ever computed for pull_request events; push events to
+  # protected branches always run the full matrix (docs_only stays 'false').
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed paths
+        id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # Full CI on anything that is not a pull request (push to main/develop).
+          if [ "${EVENT_NAME}" != "pull_request" ]; then
+            echo "Not a pull_request event (${EVENT_NAME}); running full CI."
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          files="$(git diff --name-only "${BASE_SHA}" "${HEAD_SHA}")"
+          echo "Changed files:"
+          echo "${files}"
+
+          if [ -z "${files}" ]; then
+            # No files detected -> be conservative and run full CI.
+            echo "No changed files detected; running full CI."
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          docs_only=true
+          IFS=$'\n'
+          for f in ${files}; do
+            case "${f}" in
+              # NEVER docs-only: any change here must run the full matrix.
+              # In bash 'case', '*' matches '/', so 'src/*' covers nested paths.
+              src/* | tests/* | examples/* | cookbook/* | \
+              pyproject.toml | hatch.toml | Makefile | \
+              requirements*.txt | *.lock | \
+              .github/workflows/* | .github/actions/* | \
+              Dockerfile | docker-compose*.yml | docker-compose*.yaml)
+                echo "Non-docs path forces full CI: ${f}"
+                docs_only=false
+                break
+                ;;
+              # Docs allowlist.
+              *.md | docs/* | .omc/*)
+                ;;
+              # Anything unrecognised is treated as non-docs (fail safe).
+              *)
+                echo "Unrecognised path forces full CI: ${f}"
+                docs_only=false
+                break
+                ;;
+            esac
+          done
+          unset IFS
+
+          echo "docs_only=${docs_only}"
+          echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: changes
+    if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -47,3 +123,41 @@ jobs:
           fail_ci_if_error: false
         env:
           CODECOV_RETRIES: 3
+
+  # Single required status check for branch protection. It always runs so the
+  # required check is never left permanently pending. It passes when the diff is
+  # docs-only (test matrix intentionally skipped) or when the test matrix
+  # succeeded, and fails otherwise.
+  ci-required:
+    needs: [changes, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate required checks
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          DOCS_ONLY: ${{ needs.changes.outputs.docs_only }}
+        run: |
+          set -euo pipefail
+          echo "changes result: ${CHANGES_RESULT}"
+          echo "test result:    ${TEST_RESULT}"
+          echo "docs_only:      ${DOCS_ONLY}"
+
+          if [ "${CHANGES_RESULT}" != "success" ]; then
+            echo "Classification job did not succeed; failing required check."
+            exit 1
+          fi
+
+          if [ "${DOCS_ONLY}" = "true" ]; then
+            echo "Docs-only change: test matrix intentionally skipped. Passing."
+            exit 0
+          fi
+
+          if [ "${TEST_RESULT}" = "success" ]; then
+            echo "Test matrix succeeded. Passing."
+            exit 0
+          fi
+
+          echo "Test matrix result was '${TEST_RESULT}'. Failing required check."
+          exit 1
