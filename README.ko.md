@@ -8,7 +8,7 @@
 [![Security Scans](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml/badge.svg)](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/yeongseon/azure-functions-validation-python/branch/main/graph/badge.svg)](https://codecov.io/gh/yeongseon/azure-functions-validation-python)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
-[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://yeongseon.github.io/azure-functions-validation-python/)
+[![Docs](https://img.shields.io/badge/docs-yeongseon.dev-blue)](https://yeongseon.dev/azure-functions-python/validation/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 다른 언어: [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
@@ -69,7 +69,7 @@ flowchart LR
 | PyPI package   | `azure-functions-validation`        |
 | Python import  | `azure_functions_validation`        |
 
-저장소 이름에는 Python 구현체임을 표시하기 위해 `-python` 접미사가 붙어 있습니다. PyPI 패키지명은 Python 생태계 관례에 맞춰 접미사 없이 게시되므로 설치 명령은 `pip install azure-functions-validation`으로 자연스럽게 유지됩니다. 자세한 설명은 [FAQ](https://yeongseon.github.io/azure-functions-validation-python/faq/#why-does-the-repo-use--python-but-the-pypi-package-does-not)를 참고하세요.
+저장소 이름에는 Python 구현체임을 표시하기 위해 `-python` 접미사가 붙어 있습니다. PyPI 패키지명은 Python 생태계 관례에 맞춰 접미사 없이 게시되므로 설치 명령은 `pip install azure-functions-validation`으로 자연스럽게 유지됩니다. 자세한 설명은 [FAQ](https://yeongseon.dev/azure-functions-python/validation/faq/#why-does-the-repo-use-python-but-the-pypi-package-does-not)를 참고하세요.
 
 ## Installation
 

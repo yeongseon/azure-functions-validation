@@ -107,7 +107,7 @@ def create_user(req: func.HttpRequest, body: CreateUserRequest) -> CreateUserRes
 For dependency setup details, see [Installation](installation.md).
 
 !!! info "About the names"
-    The repository is `azure-functions-validation-python`, the PyPI package is `azure-functions-validation`, and the import is `azure_functions_validation`. See the [FAQ](faq.md#why-does-the-repo-use--python-but-the-pypi-package-does-not) for why.
+    The repository is `azure-functions-validation-python`, the PyPI package is `azure-functions-validation`, and the import is `azure_functions_validation`. See the [FAQ](faq.md#why-does-the-repo-use-python-but-the-pypi-package-does-not) for why.
 
 ## Example Index
 

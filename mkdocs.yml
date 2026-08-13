@@ -1,7 +1,7 @@
 site_name: Azure Functions Validation
 site_description: Validation and serialization for Python-based Azure Functions
 site_author: Yeongseon Choe
-site_url: https://yeongseon.github.io/azure-functions-validation-python/
+site_url: https://yeongseon.dev/azure-functions-python/validation/
 repo_url: https://github.com/yeongseon/azure-functions-validation-python
 edit_uri: edit/main/docs/
 

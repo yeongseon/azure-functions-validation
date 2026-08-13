@@ -30,8 +30,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://yeongseon.github.io/azure-functions-validation-python/"
-Documentation = "https://yeongseon.github.io/azure-functions-validation-python/"
+Homepage = "https://yeongseon.dev/azure-functions-python/validation/"
+Documentation = "https://yeongseon.dev/azure-functions-python/validation/"
 Repository = "https://github.com/yeongseon/azure-functions-validation-python"
 Issues = "https://github.com/yeongseon/azure-functions-validation-python/issues"
 

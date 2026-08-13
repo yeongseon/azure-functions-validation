@@ -10,7 +10,7 @@
 [![Security Scans](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml/badge.svg)](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/yeongseon/azure-functions-validation-python/branch/main/graph/badge.svg)](https://codecov.io/gh/yeongseon/azure-functions-validation-python)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
-[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://yeongseon.github.io/azure-functions-validation-python/)
+[![Docs](https://img.shields.io/badge/docs-yeongseon.dev-blue)](https://yeongseon.dev/azure-functions-python/validation/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Read this in: [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
@@ -214,7 +214,7 @@ Three names cover three different contexts:
 | PyPI package   | `azure-functions-validation`        |
 | Python import  | `azure_functions_validation`        |
 
-The repository carries the `-python` suffix to mark it as the Python implementation. The PyPI package follows Python ecosystem conventions and is published without the suffix, so installation stays idiomatic: `pip install azure-functions-validation`. See the [FAQ entry](https://yeongseon.github.io/azure-functions-validation-python/faq/#why-does-the-repo-use--python-but-the-pypi-package-does-not) for the long version.
+The repository carries the `-python` suffix to mark it as the Python implementation. The PyPI package follows Python ecosystem conventions and is published without the suffix, so installation stays idiomatic: `pip install azure-functions-validation`. See the [FAQ entry](https://yeongseon.dev/azure-functions-python/validation/faq/#why-does-the-repo-use-python-but-the-pypi-package-does-not) for the long version.
 
 ## Installation
 

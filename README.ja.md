@@ -8,7 +8,7 @@
 [![Security Scans](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml/badge.svg)](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/yeongseon/azure-functions-validation-python/branch/main/graph/badge.svg)](https://codecov.io/gh/yeongseon/azure-functions-validation-python)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
-[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://yeongseon.github.io/azure-functions-validation-python/)
+[![Docs](https://img.shields.io/badge/docs-yeongseon.dev-blue)](https://yeongseon.dev/azure-functions-python/validation/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 他の言語: [English](README.md) | [한국어](README.ko.md) | [简体中文](README.zh-CN.md)
@@ -69,7 +69,7 @@ flowchart LR
 | PyPI package   | `azure-functions-validation`        |
 | Python import  | `azure_functions_validation`        |
 
-リポジトリ名は Python 実装であることを示すために `-python` サフィックスを付けています。PyPI パッケージ名は Python エコシステムの慣例に従いサフィックスを付けずに公開されているため、インストールは自然に `pip install azure-functions-validation` のままです。詳細は [FAQ](https://yeongseon.github.io/azure-functions-validation-python/faq/#why-does-the-repo-use--python-but-the-pypi-package-does-not) を参照してください。
+リポジトリ名は Python 実装であることを示すために `-python` サフィックスを付けています。PyPI パッケージ名は Python エコシステムの慣例に従いサフィックスを付けずに公開されているため、インストールは自然に `pip install azure-functions-validation` のままです。詳細は [FAQ](https://yeongseon.dev/azure-functions-python/validation/faq/#why-does-the-repo-use-python-but-the-pypi-package-does-not) を参照してください。
 
 ## Installation
 
