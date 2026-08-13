@@ -138,10 +138,13 @@ module = "examples.*"
 follow_imports = "skip"
 
 [tool.pytest.ini_options]
-addopts = "--cov=src/azure_functions_validation --cov-report=xml --cov-report=term-missing -ra -q -m 'not e2e'"
+addopts = "--cov=src/azure_functions_validation --cov-report=xml --cov-report=term-missing -ra -q -m 'not e2e and not compat2x'"
 testpaths = ["tests"]
 pythonpath = ["src", ".", "examples", "tests/_test_app"]
-markers = ["e2e: real Azure end-to-end tests (require E2E_BASE_URL)"]
+markers = [
+    "e2e: real Azure end-to-end tests (require E2E_BASE_URL)",
+    "compat2x: opt-in azure-functions 2.x compatibility spike (require AZFUNC_2X_SPIKE=1)",
+]
 
 [tool.coverage.run]
 branch = true
