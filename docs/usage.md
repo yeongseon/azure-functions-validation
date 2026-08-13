@@ -367,7 +367,7 @@ if meta and "validation" in meta:
     This is the integration point used by `azure-functions-openapi`'s
     `scan_validation_metadata()` bridge to auto-generate OpenAPI specs from
     validation decorators. See the
-    [azure-functions-openapi docs](https://yeongseon.github.io/azure-functions-openapi/)
+    [azure-functions-openapi docs](https://yeongseon.dev/azure-functions-python/openapi/)
     for details.
 
 

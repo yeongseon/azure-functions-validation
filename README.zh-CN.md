@@ -8,7 +8,7 @@
 [![Security Scans](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml/badge.svg)](https://github.com/yeongseon/azure-functions-validation-python/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/yeongseon/azure-functions-validation-python/branch/main/graph/badge.svg)](https://codecov.io/gh/yeongseon/azure-functions-validation-python)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://pre-commit.com/)
-[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://yeongseon.github.io/azure-functions-validation-python/)
+[![Docs](https://img.shields.io/badge/docs-yeongseon.dev-blue)](https://yeongseon.dev/azure-functions-python/validation/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 其他语言: [English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
@@ -69,7 +69,7 @@ flowchart LR
 | PyPI package   | `azure-functions-validation`        |
 | Python import  | `azure_functions_validation`        |
 
-仓库名带有 `-python` 后缀，用于标识其为 Python 实现。PyPI 包名遵循 Python 生态约定，不带后缀，因此安装命令仍然是自然的 `pip install azure-functions-validation`。详细说明请参阅 [FAQ](https://yeongseon.github.io/azure-functions-validation-python/faq/#why-does-the-repo-use--python-but-the-pypi-package-does-not)。
+仓库名带有 `-python` 后缀，用于标识其为 Python 实现。PyPI 包名遵循 Python 生态约定，不带后缀，因此安装命令仍然是自然的 `pip install azure-functions-validation`。详细说明请参阅 [FAQ](https://yeongseon.dev/azure-functions-python/validation/faq/#why-does-the-repo-use-python-but-the-pypi-package-does-not)。
 
 ## Installation
 
