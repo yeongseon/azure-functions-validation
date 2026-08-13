@@ -101,7 +101,12 @@ normalized to `<2.0.0` everywhere:
 | azure-functions-langgraph | `>=1.17,<2.0.0` |
 | azure-functions-knowledge | `>=1.22.0,<2.0.0` |
 | azure-functions-scaffold | `>=1.23.0,<2.0.0` |
-| azure-functions-durable-graph | `>=1.17,<2.0.0` (normalized from `<3`) |
+| azure-functions-durable-graph | `>=1.17,<2.0.0` |
+
+> `azure-functions-durable-graph` additionally caps the separate
+> `azure-functions-durable` extension at `<3`; that is a different package with
+> its own release cadence and is **not** part of this worker-introspection
+> contract.
 
 > The upper bound is the load-bearing part. Lower bounds vary by the minimum
 > feature each package needs and are not part of the 2.0 readiness contract.
