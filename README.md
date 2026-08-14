@@ -182,6 +182,32 @@ $ curl -s -X POST http://localhost:7071/api/users \
 
 > HTTP 400
 
+## Why not just use Pydantic directly?
+
+You can. If a handler is simple, calling `Model.model_validate(req.get_json())` inside a `try/except` is perfectly fine — this package does not replace Pydantic, it wraps your Pydantic models. Reach for `@validate_http` when the manual approach starts repeating across endpoints:
+
+```python
+# Raw Pydantic in the handler — you own every step
+def create_user(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        body = CreateUserRequest.model_validate(req.get_json())
+    except ValueError:  # invalid JSON
+        return func.HttpResponse(..., status_code=400)
+    except ValidationError as exc:  # shape/type errors
+        return func.HttpResponse(exc.json(), status_code=422)  # your own envelope
+    result = CreateUserResponse(message=f"Hello {body.name}")
+    return func.HttpResponse(result.model_dump_json(), mimetype="application/json")
+```
+
+The model is one line; the parsing, the two error branches, the error envelope, and the response serialization are the other twelve — and every handler re-implements them, often inconsistently. `@validate_http` collapses that to the decorator:
+
+- **No repeated glue** — parsing, `try/except`, and serialization move out of the handler body.
+- **Consistent errors** — every endpoint returns the same `400`/`422` `{"detail": [...]}` envelope instead of a per-handler shape.
+- **Response enforcement** — `response_model` catches contract drift on the way out, not just on the way in.
+- **Discoverable metadata** — the decorator records request/response models so [`azure-functions-openapi`](https://github.com/yeongseon/azure-functions-openapi-python)'s bridge can generate OpenAPI docs from the same models. See [docs/usage.md](docs/usage.md) for the metadata bridge.
+
+In short: raw Pydantic validates *one* handler; `@validate_http` standardizes *every* handler. Compare the full [Before / After](#before--after) above.
+
 ## FastAPI comparison
 
 | Feature | FastAPI | azure-functions-validation |
