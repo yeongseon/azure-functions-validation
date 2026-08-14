@@ -1,6 +1,34 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [0.11.2] - 2026-08-14
+
+### ⚙️ Miscellaneous Tasks
+
+- Stop auto-deploying docs to GitHub Pages (#335) 
+- Skip test matrix for docs-only PRs via ci-required aggregator (#329) 
+- *(ci)* Normalize action version-comment labels (#328) 
+- Add fleet-wide workflow pin-hygiene lint (#327) 
+- Automate release-gate action floor bumps via Renovate (#326) 
+- *(deps)* Document azure-functions 2.0 readiness and add opt-in compat spike (#324) 
+- Add release-gate workflow drift lint (#317) 
+- Normalize release-gate action pins to canonical SHAs (#316) 
+- Rename cookbook-local-e2e to cookbook-host-smoke and correct tier claims (#309) 
+- Add local func-host e2e + real-Azure certification gates to publish (#302) 
+- Bump ruff to 0.16.2 and repair pre-commit hooks (#300) 
+- Gate PyPI publish on library + cookbook verification (#301) 
+
+### 💼 Other
+
+- Bump version to 0.11.2 
+
+### 📚 Documentation
+
+- Add 'Why not just use Pydantic directly?' section (#337) 
+- Consolidate official documentation URL onto yeongseon.dev (#333) 
+- *(i18n)* Adopt best-effort translation policy with staleness banners (#325) 
+- *(metadata)* Reframe endpoint metadata doc as a convention (#323) 
+- Sync docs with deprecated request_model and public adapter exports (#311) 
 ## [0.11.1] - 2026-08-12
 
 ### ⚙️ Miscellaneous Tasks
@@ -14,6 +42,10 @@ All notable changes to this project will be documented in this file.
 ### 💼 Other
 
 - Bump version to 0.11.1 
+
+### 📚 Documentation
+
+- Update changelog 
 ## [0.11.0] - 2026-08-12
 
 ### 💼 Other
