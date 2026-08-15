@@ -1,0 +1,34 @@
+# Screenshot provenance manifest.
+#
+# Records where each documentation screenshot came from so drift can be
+# detected automatically. `source.hash` is a combined SHA-256 over the
+# `source.inputs` files (see scripts/check_screenshots.py); when those inputs
+# change, the recomputed hash no longer matches and the screenshot is flagged
+# as potentially stale and in need of re-capture.
+#
+# This manifest is seeded EMPTY on purpose: the provenance pipeline (checker +
+# staleness workflow + e2e-azure capture step) is in place, but no screenshot
+# has been captured yet. The Azure Release Certification workflow
+# (.github/workflows/e2e-azure.yml) captures live endpoint screenshots against a
+# real deployment; a maintainer then adds an entry here (method: playwright),
+# embeds the image in the docs, and refreshes the hash with
+# `python scripts/check_screenshots.py --update`.
+#
+# `captured` fields are provenance only — they are never used for staleness
+# decisions (that is what `source.hash` is for).
+#
+# schema_version 1 entry shape:
+#   id:        stable unique identifier (kebab/underscore)
+#   image:     repo-relative path to the PNG
+#   captured:
+#     package_version: version the screenshot was captured against
+#     git_sha:         commit the screenshot was captured against
+#     date:            ISO-8601 capture (or seed) date
+#     method:          "manual" | "playwright"
+#   source:
+#     inputs: [repo-relative files whose change invalidates the screenshot]
+#     hash:   combined sha256 over inputs (recomputed by the checker)
+#   output:  (optional)
+#     hash:  sha256 of the image bytes, for tamper/regeneration tracking
+schema_version: 1
+screenshots: []
