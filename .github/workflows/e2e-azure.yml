@@ -204,6 +204,33 @@ jobs:
         env:
           E2E_BASE_URL: https://${{ steps.names.outputs.app }}.azurewebsites.net
 
+      # Best-effort provenance capture of live endpoint responses. Non-gating
+      # (continue-on-error): a screenshot failure must never block certification.
+      # A maintainer later registers captured images in docs/assets/screenshots.yml
+      # (method: playwright) and embeds them in the docs.
+      - name: Capture endpoint screenshots
+        if: always()
+        continue-on-error: true
+        env:
+          E2E_APP_URL: https://${{ steps.names.outputs.app }}.azurewebsites.net
+          OUT_DIR: screenshots
+          CAPTURE_SHA: ${{ inputs.ref || github.sha }}
+          CAPTURE_VERSION: ${{ inputs.version }}
+        run: |
+          npm install --no-save playwright@1.54.1
+          npx playwright install --with-deps chromium
+          node scripts/capture_screenshots.mjs
+
+      - name: Upload screenshots
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: endpoint-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
+          path: screenshots/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Record certification
         run: |
           SHA=$(git rev-parse HEAD)
