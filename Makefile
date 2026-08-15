@@ -84,6 +84,14 @@ check-all: ensure-hatch
 	@$(MAKE) security
 	@echo "All checks passed including tests and security scan."
 
+.PHONY: screenshots-check
+screenshots-check: ensure-hatch
+	@$(HATCH) run python scripts/check_screenshots.py --strict
+
+.PHONY: screenshots-update
+screenshots-update: ensure-hatch
+	@$(HATCH) run python scripts/check_screenshots.py --update
+
 .PHONY: precommit
 precommit: ensure-hatch
 	@$(HATCH) run precommit
