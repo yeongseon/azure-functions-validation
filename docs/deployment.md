@@ -55,6 +55,14 @@ environment — the temporary resources were deleted afterward (see
 [`e2e-azure` workflow](https://github.com/yeongseon/azure-functions-validation-python/blob/main/.github/workflows/e2e-azure.yml) deploys
 [`examples/e2e_app`](https://github.com/yeongseon/azure-functions-validation-python/tree/main/examples/e2e_app) to a fresh Azure instance on demand.
 
+The portal screens below were captured against that temporary deployment. See
+[`screenshot-capture.md`](./screenshot-capture.md) for how these are captured and
+tracked for staleness.
+
+![Function App Overview](assets/portal-functionapp-overview.png)
+
+![Functions list](assets/portal-functionapp-functions.png)
+
 ---
 
 ## Read these warnings before provisioning
