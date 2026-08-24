@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import types
 from typing import Any, Callable, Mapping, get_type_hints
 import warnings
 
@@ -344,11 +345,43 @@ class WorkerCompat:
         """
         if not passthrough:
             return {}
+        # Fast path: resolve every annotation in one pass.
         try:
             hints = get_type_hints(func)
         except Exception:  # pragma: no cover - defensive; user-module resolution
-            hints = {}
-        return {name: hints[name] for name, _param in passthrough if name in hints}
+            hints = None
+        if hints is not None:
+            return {name: hints[name] for name, _param in passthrough if name in hints}
+        # Fallback: a single unresolvable annotation must not drop *all* binding
+        # annotations (all-or-nothing get_type_hints failure). Resolve each
+        # passthrough param independently so the surviving bindings stay typed.
+        func_globals = getattr(func, "__globals__", {})
+        resolved: dict[str, Any] = {}
+        for name, param in passthrough:
+            annotation = self._resolve_one_annotation(param.annotation, func_globals)
+            if annotation is not inspect.Parameter.empty:
+                resolved[name] = annotation
+        return resolved
+
+    @staticmethod
+    def _resolve_one_annotation(annotation: Any, func_globals: Mapping[str, Any]) -> Any:
+        """Resolve a single (possibly stringized) annotation in isolation.
+
+        Returns ``inspect.Parameter.empty`` when the annotation is absent or
+        cannot be resolved, so one bad annotation never poisons the others.
+        Resolution reuses ``get_type_hints`` on a throwaway probe carrying only
+        this annotation (no ``eval``), evaluated against the handler's globals.
+        """
+        if annotation is inspect.Parameter.empty:
+            return inspect.Parameter.empty
+        if not isinstance(annotation, str):
+            return annotation
+        probe = types.FunctionType((lambda: None).__code__, dict(func_globals))
+        probe.__annotations__ = {"a": annotation}
+        try:
+            return get_type_hints(probe).get("a", inspect.Parameter.empty)
+        except Exception:  # pragma: no cover - user annotation resolution
+            return inspect.Parameter.empty
 
     def _override_signature(
         self,

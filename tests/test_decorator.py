@@ -425,6 +425,38 @@ class TestPassthroughBindingParams:
         assert handler.__annotations__ == {"order_doc": func.Out[str]}
         assert not hasattr(handler, "__wrapped__")
 
+    def test_unresolvable_annotation_preserves_other_bindings(self) -> None:
+        """One unresolvable annotation must not strip resolvable binding types.
+
+        ``get_type_hints`` is all-or-nothing: a single unresolvable forward
+        reference makes it raise, which previously dropped *every* passthrough
+        annotation and left the worker unable to validate real output bindings.
+        The fallback resolves each param independently so survivors stay typed.
+        """
+        import inspect
+
+        import azure.functions as func
+
+        @validate_http(body=UserModel)
+        def handler(
+            req: HttpRequest,
+            body: UserModel,
+            order_doc: func.Out[str],
+            mystery: "DoesNotExistType",  # type: ignore[name-defined]  # noqa: F821 - intentionally unresolvable
+        ) -> HttpResponse:
+            return HttpResponse("ok")
+
+        # All passthrough params stay visible to the worker...
+        assert list(inspect.signature(handler).parameters) == [
+            "req",
+            "order_doc",
+            "mystery",
+        ]
+        # ...and the resolvable binding keeps its concrete annotation even though
+        # ``mystery`` could not be resolved (it is simply left unannotated).
+        assert handler.__annotations__ == {"order_doc": func.Out[str]}
+        assert "mystery" not in handler.__annotations__
+
     def test_input_binding_param_is_exposed_and_forwarded(self) -> None:
         import inspect
 
