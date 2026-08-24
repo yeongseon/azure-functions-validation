@@ -58,7 +58,7 @@ its own local conformance tests against the versioned dict convention.
 {
   "version": 1,                     // const 1; consumers WARN (not fail) on unknown
   "request_body": { /* JSON Schema */ } | null,
-  "request_body_required": true,    // default true unless every body field has a default
+  "request_body_required": true,    // true whenever a body model is configured (runtime rejects empty body)
   "parameters": [                   // OpenAPI parameter objects (query/path/header)
     { "name": "id", "in": "path", "required": true, "schema": { /* JSON Schema */ } }
   ],
@@ -148,7 +148,7 @@ requires plain JSON Schema with `$defs` left unresolved:
 | Ref template | Pydantic default `#/$defs/{model}` |
 | `$defs` | **left UNRESOLVED** — the consumer hoists them to `components/schemas` |
 | Generator class | Pydantic default `GenerateJsonSchema` (pin explicitly if customized; Pydantic minor bumps can change output) |
-| `request_body_required` | `True` unless every field of the body model has a default |
+| `request_body_required` | `True` whenever a body model is configured — the runtime unconditionally rejects an empty body with 422 regardless of field optionality (#347) |
 
 The response-schema mode above applies to **Pydantic-derived response-model
 schemas**. The `422` validation-error response schema is produced directly

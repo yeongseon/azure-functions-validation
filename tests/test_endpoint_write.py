@@ -247,12 +247,12 @@ class TestCanonicalization:
 
         assert _endpoint_of(handler)["request_body_required"] is True
 
-    def test_request_body_required_false_when_all_optional(self) -> None:
+    def test_request_body_required_true_when_all_optional(self) -> None:
         @validate_http(body=AllOptional)
         def handler(req: func.HttpRequest, body: AllOptional) -> Any:
             return {}
 
-        assert _endpoint_of(handler)["request_body_required"] is False
+        assert _endpoint_of(handler)["request_body_required"] is True
 
     def test_path_parameter_always_required(self) -> None:
         @validate_http(path=PathParams)

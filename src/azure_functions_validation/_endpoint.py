@@ -144,7 +144,12 @@ def build_endpoint_metadata(config: Any) -> EndpointMetadata:
     body = config.body
     if _is_model_type(body):
         request_body: dict[str, Any] | None = _model_schema(body, "validation")
-        request_body_required = any(field.is_required() for field in body.model_fields.values())
+        # The runtime adapter unconditionally rejects an empty body (422) whenever
+        # a body model is configured, regardless of individual field optionality,
+        # so the metadata must report the body as required to stay truthful to
+        # actual server behaviour (#347). Optional-body support, if ever added,
+        # must be an explicit opt-in that also relaxes the runtime 422.
+        request_body_required = True
     else:
         request_body = None
         request_body_required = False
