@@ -424,6 +424,7 @@ leak to clients.
 
 - Project docs live under `docs/`
 - Smoke-tested examples live under `examples/`
+- Endpoint metadata contract: [`docs/METADATA_SPEC.md`](docs/METADATA_SPEC.md) — the `endpoint` namespace payload (parameters, `in` mapping, `required` rules) that [`azure-functions-openapi`](https://github.com/yeongseon/azure-functions-openapi-python) consumes
 - Product requirements: `PRD.md`
 - Design principles: `DESIGN.md`
 - Design notes: [`docs/design/optional-body-347.md`](docs/design/optional-body-347.md) — why a configured body is always reported as required (#347)
