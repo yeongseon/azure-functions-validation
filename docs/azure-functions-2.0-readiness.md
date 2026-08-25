@@ -127,3 +127,23 @@ pytest -m compat2x -o addopts='' tests/test_worker_compat_2x_spike.py
 
 If the spike passes cleanly, capture the `azure-functions` version and attach it
 to the tracking issue as evidence toward the cap-lift checklist above.
+
+## CI proof lane (issue #351)
+
+The spike also runs automatically as the `azure-functions 2.x compat (Py 3.13)`
+job in `.github/workflows/ci-test.yml` (modeled on langgraph `d433b63`). That
+job builds the wheel, installs it, overrides the `<2.0.0` cap with
+`azure-functions>=2,<3`, and runs the `compat2x` spike against the
+wheel-installed package with `AZFUNC_2X_SPIKE=1` and `-o pythonpath=`.
+
+**Gating decision — visible signal, not a merge blocker.** The lane runs on
+every non-docs PR so 2.x worker/loader regressions surface early, but it is
+deliberately **not** wired into the `ci-required` aggregation check. Worker
+compatibility is existential, yet the runtime cap stays `<2.0.0` until 2.x is
+certified on real Azure via `e2e-azure.yml`; making the lane blocking before
+that certification would gate merges on an uncertified runtime (and on the
+availability of a 2.x build on PyPI). Promote it to a required status check via
+branch protection at the same time the cap is lifted.
+
+A single representative 3.13 lane is used intentionally — not a version matrix —
+to keep CI cost bounded, since 2.x declares `Requires-Python >=3.13`.
