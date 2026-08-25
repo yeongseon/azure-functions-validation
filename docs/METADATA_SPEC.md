@@ -119,11 +119,13 @@ Each field becomes one parameter object `{ "name", "in", "required", "schema" }`
   - `path` parameters are **always** `required: true` — a path segment cannot
     be absent from a matched route, regardless of the field's optionality.
   - `query` and `header` parameters are `required: true` only when the field
-    appears in the model's JSON Schema `required` list (i.e. it has no default
-    and is not `Optional`); otherwise `required: false`.
+    appears in the model's JSON Schema `required` list (i.e. it has no default);
+    otherwise `required: false`. This keys off the schema's `required` list, not
+    the annotation — a field typed `Optional[...]` with no default is still
+    required.
   - Body-required behaviour is separate: `request_body_required` is `true`
-    whenever a body model is configured (#347) — see the design note
-    [`optional-body-347.md`](design/optional-body-347.md).
+    whenever a body model is configured — see issue
+    [#347](https://github.com/yeongseon/azure-functions-validation-python/issues/347).
 - **`schema`** is the field's Pydantic-generated JSON Schema. If the field
   references a nested model via `$ref`, the parameter's `schema` carries a
   top-level `$defs` so the consumer can hoist it (the `$defs`-if-`$ref`
