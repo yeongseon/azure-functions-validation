@@ -95,6 +95,50 @@ The rest of this document describes rules that are **specific to
 are not obligations on the generic `endpoint` convention above; other producers
 of the namespace implement their own equivalents.
 
+### Parameter mapping and `required` rules (validation-specific)
+
+`@validate_http` accepts three parameter models — `query=`, `path=`, and
+`headers=` — and `build_endpoint_metadata` flattens each model's fields into
+OpenAPI parameter objects. The model argument determines the `in` location:
+
+| Decorator argument | Emitted `in` value |
+| --- | --- |
+| `query=Model` | `"query"` |
+| `path=Model` | `"path"` |
+| `headers=Model` | `"header"` |
+
+(Note the singular OpenAPI spelling `header`, not `headers`.) A body model
+does **not** produce `parameters` entries — it is emitted as `request_body`.
+
+Each field becomes one parameter object `{ "name", "in", "required", "schema" }`:
+
+- **`name`** uses the field's serialization alias (`by_alias=True`), so it
+  matches the wire contract rather than the Python attribute name. Configure
+  aliases with Pydantic v2 `Field(alias=...)` / `alias_generator`.
+- **`required`** rules:
+  - `path` parameters are **always** `required: true` — a path segment cannot
+    be absent from a matched route, regardless of the field's optionality.
+  - `query` and `header` parameters are `required: true` only when the field
+    appears in the model's JSON Schema `required` list (i.e. it has no default
+    and is not `Optional`); otherwise `required: false`.
+  - Body-required behaviour is separate: `request_body_required` is `true`
+    whenever a body model is configured (#347) — see the design note
+    [`optional-body-347.md`](design/optional-body-347.md).
+- **`schema`** is the field's Pydantic-generated JSON Schema. If the field
+  references a nested model via `$ref`, the parameter's `schema` carries a
+  top-level `$defs` so the consumer can hoist it (the `$defs`-if-`$ref`
+  invariant).
+
+#### Repeated / array query parameters
+
+There is no special "explode" flag in the payload. A repeated query parameter
+is modelled as an ordinary field whose schema is an array — e.g. a
+`list[str]` field emits `"schema": { "type": "array", "items": {…} }`. The
+consumer derives OpenAPI array/`explode` semantics from that array schema; the
+producer does not encode collection-style hints separately. Runtime parsing of
+repeated `req.params` into a list is the adapter's responsibility and is out of
+scope for this metadata contract.
+
 ### The `422` validation-error response (validation-specific)
 
 `@validate_http` returns a `422` on request-validation failure, so when the
