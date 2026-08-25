@@ -148,7 +148,8 @@ def build_endpoint_metadata(config: Any) -> EndpointMetadata:
         # a body model is configured, regardless of individual field optionality,
         # so the metadata must report the body as required to stay truthful to
         # actual server behaviour (#347). Optional-body support, if ever added,
-        # must be an explicit opt-in that also relaxes the runtime 422.
+        # must be an explicit opt-in that also relaxes the runtime 422. See the
+        # durable design note: docs/design/optional-body-347.md.
         request_body_required = True
     else:
         request_body = None

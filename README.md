@@ -426,6 +426,7 @@ leak to clients.
 - Smoke-tested examples live under `examples/`
 - Product requirements: `PRD.md`
 - Design principles: `DESIGN.md`
+- Design notes: [`docs/design/optional-body-347.md`](docs/design/optional-body-347.md) — why a configured body is always reported as required (#347)
 
 ## Ecosystem
 
