@@ -198,7 +198,12 @@ jobs:
           python -m build --wheel --outdir dist
 
       - name: Install wheel with dev extra
-        run: pip install "$(ls dist/azure_functions_validation-*.whl)[dev]"
+        # Use a PEP 508 direct reference (name[extra] @ file://ABS_PATH) so pip
+        # resolves the dev extra from the wheel metadata; pip does not parse
+        # extras from a bare local wheel path.
+        run: |
+          wheel="$(ls dist/azure_functions_validation-*.whl)"
+          pip install "azure-functions-validation[dev] @ file://$(readlink -f "$wheel")"
 
       - name: Upgrade azure-functions to the 2.x line
         # pyproject caps azure-functions <2.0.0 until 2.x is certified on real
