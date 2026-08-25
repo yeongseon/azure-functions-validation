@@ -9,7 +9,28 @@ updates:
     labels:
       - "dependencies"
     open-pull-requests-limit: 10
-# NOTE: GitHub Actions bumps are handled by Renovate (renovate.json), not
-# Dependabot, so a single PR can update both the workflow `uses:` SHA and the
-# canonical pin in tools/lint_release_workflows.py and keep the drift lint green.
-# See issue #320.
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
