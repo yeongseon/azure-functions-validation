@@ -50,6 +50,6 @@ jobs:
       - name: Explain a WorkerCompat break
         if: failure()
         run: |
-          echo "::error::WorkerCompat suite failed against the latest pre-release azure-functions worker."
-          echo "This usually means an upstream worker/loader change broke signature-override, annotation clearing, or safe-metadata copying."
+          echo "::error::WorkerCompat suite failed against the latest pre-release azure-functions package."
+          echo "This job upgrades the azure-functions library (which proxies worker/loader behavior); a failure usually means an upstream change broke signature-override, annotation clearing, or safe-metadata copying."
           echo "See the mechanism this suite protects: https://yeongseon.dev/azure-functions-python/platform/how-the-worker-binds-handlers/"
