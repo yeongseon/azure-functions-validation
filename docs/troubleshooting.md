@@ -78,6 +78,8 @@ def my_handler(req: func.HttpRequest, body: MyBodyModel) -> dict[str, str]:
     return {"ok": "true"}
 ```
 
+Decorator order matters because the Azure Functions worker binds handler parameters by **name**, and `@validate_http` must wrap the handler without disturbing the worker's signature introspection. For the underlying mechanism see [How the worker binds handlers §2–§3](https://yeongseon.dev/azure-functions-python/platform/how-the-worker-binds-handlers/) (parameter passthrough and `req`/`context` resolution). This repo's WorkerCompat suite (`tests/test_decorator.py`, `tests/test_worker_compat_2x_spike.py`) is the executable proof of that contract.
+
 ### Problem: expected body validation but got `400 Invalid JSON`
 
 Cause:
