@@ -55,6 +55,8 @@ flowchart LR
     AD2 --> RESP([HttpResponse])
 ```
 
+> **Decorator order and parameter passthrough:** `@validate_http` must sit directly beneath `@app.route(...)` so the Azure Functions worker still sees a handler whose parameters it can bind by name (`req`, `context`, and your validated models). The worker's name-binding contract — and this repo's WorkerCompat tests that verify it — is explained in [How the worker binds handlers](https://yeongseon.dev/azure-functions-python/platform/how-the-worker-binds-handlers/).
+
 ## Before / After
 
 <details>

@@ -46,3 +46,10 @@ jobs:
         run: |
           hatch run pytest tests/test_decorator.py tests/test_integration.py \
             -v --no-header -p no:cacheprovider --no-cov
+
+      - name: Explain a WorkerCompat break
+        if: failure()
+        run: |
+          echo "::error::WorkerCompat suite failed against the latest pre-release azure-functions worker."
+          echo "This usually means an upstream worker/loader change broke signature-override, annotation clearing, or safe-metadata copying."
+          echo "See the mechanism this suite protects: https://yeongseon.dev/azure-functions-python/platform/how-the-worker-binds-handlers/"

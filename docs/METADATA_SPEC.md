@@ -19,6 +19,8 @@ Status: **v1** · Owner namespace: `endpoint` · Issue: [#271](https://github.co
 
 ## Purpose
 
+> **Relationship to the worker contract:** This document is the *cross-package* contract (how sibling packages exchange `endpoint` metadata). The platform's *worker contract* — how the Azure Functions worker binds handler parameters by name — is explained separately in [How the worker binds handlers](https://yeongseon.dev/azure-functions-python/platform/how-the-worker-binds-handlers/). This page = cross-package convention; the worker-binding page = platform runtime contract.
+
 The Azure Functions Python DX Toolkit lets sibling packages cooperate without
 importing one another. Decorators attach a single dict to the wrapped handler
 under the conventional attribute `_azure_functions_metadata`, keyed by a
